@@ -2,14 +2,22 @@
   "name": "back-museo",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "node js",
+    "jwt",
+    "authentication",
+    "express",
+    "postgresql"
+  ],
+  "author": "Rommel Chocho",
   "license": "ISC",
   "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
     "whisper-node": "^0.2.12"
   }
 }
