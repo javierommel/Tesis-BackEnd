@@ -1,3 +1,4 @@
+require('dotenv').config();
 module.exports = {
-    secret: "clave-secreta"
+    secret: process.env.CLIENT_SECRET,
   };

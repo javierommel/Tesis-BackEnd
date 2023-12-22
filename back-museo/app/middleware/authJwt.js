@@ -17,7 +17,7 @@ verifyToken = (req, res, next) => {
             (err, decoded) => {
               if (err) {
                 return res.status(401).send({
-                  message: "Unauthorized!",
+                  message: "Usuario no autorizado!",
                 });
               }
               req.userId = decoded.id;
@@ -36,7 +36,7 @@ isAdmin = (req, res, next) => {
       }
 
       res.status(403).send({
-        message: "Require Admin Role!"
+        message: "Se requiere rol de administrador!"
       });
       return;
     });
@@ -54,7 +54,7 @@ isModerator = (req, res, next) => {
       }
 
       res.status(403).send({
-        message: "Require Moderator Role!"
+        message: "Se requiere rol de superusuario!"
       });
     });
   });
@@ -76,7 +76,7 @@ isModeratorOrAdmin = (req, res, next) => {
       }
 
       res.status(403).send({
-        message: "Require Moderator or Admin Role!"
+        message: "Se requiere rol de usuario!"
       });
     });
   });
