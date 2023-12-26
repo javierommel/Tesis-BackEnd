@@ -6,6 +6,9 @@ module.exports = (sequelize, Sequelize) => {
       },
       name: {
         type: Sequelize.STRING
+      },
+      estado: {
+        type: Sequelize.TINYINT
       }
     });
   
