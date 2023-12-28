@@ -8,7 +8,7 @@ module.exports = (sequelize, Sequelize) => {
         type: Sequelize.STRING
       },
       estado: {
-        type: Sequelize.TINYINT
+        type: Sequelize.INTEGER
       }
     });
   

@@ -13,7 +13,7 @@ module.exports = (sequelize, Sequelize) => {
         type: Sequelize.DATEONLY
       },
       estado: {
-        type: Sequelize.TINYINT
+        type: Sequelize.INTEGER
       }
     });
   
