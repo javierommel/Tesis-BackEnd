@@ -23,6 +23,14 @@ db.sequelize = sequelize;
 
 db.user = require("../models/user.model.js")(sequelize, Sequelize);
 db.role = require("../models/role.model.js")(sequelize, Sequelize);
+db.piece = require("../models/piece.model.js")(sequelize, Sequelize);
+db.dimension = require("../models/dimension.model.js")(sequelize, Sequelize);
+db.recomendation = require("../models/recomendation.model.js")(sequelize, Sequelize);
+db.state = require("../models/state.model.js")(sequelize, Sequelize);
+db.type = require("../models/type.model.js")(sequelize, Sequelize);
+db.visit = require("../models/visit.model.js")(sequelize, Sequelize);
+db.material = require("../models/material.model.js")(sequelize, Sequelize);
+
 
 db.role.belongsToMany(db.user, {
   through: "user_roles"
@@ -30,7 +38,6 @@ db.role.belongsToMany(db.user, {
 db.user.belongsToMany(db.role, {
   through: "user_roles"
 });
-
-db.ROLES = ["user", "admin", "moderator"];
+//db.ROLES = ["user", "admin", "moderator"];
 
 module.exports = db;

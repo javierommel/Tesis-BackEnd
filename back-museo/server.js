@@ -2,7 +2,7 @@ const express = require("express")
 const cors = require("cors")
 const app = express()
 const db = require("./app/models");
-const Role = db.role;
+//const Role = db.role;
 
 var corsOptions = { origin: "http://localhost:3000" };
 app.use(cors(corsOptions))
@@ -11,7 +11,7 @@ app.use(express.urlencoded({ extended: true }))
 
 db.sequelize.sync({force: true}).then(() => {
     console.log('Drop and Resync Db');
-    initial();
+    //initial();
   });
 app.get("/", (req, res) => {
     res.json({ message: "Bienvenido" });
@@ -22,7 +22,7 @@ require('./app/routes/user.routes')(app);
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => { console.log(`Server is running on port ${PORT}`) });
 
-function initial() {
+/*function initial() {
     Role.create({
       id: 1,
       name: "user"
@@ -37,4 +37,4 @@ function initial() {
       id: 3,
       name: "admin"
     });
-  }
+  }*/

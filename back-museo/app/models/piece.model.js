@@ -1,7 +1,7 @@
 module.exports = (sequelize, Sequelize) => {
     const Piece = sequelize.define("piezas", {
       numero_ordinal: {
-        type: Sequelize.TINYINT,
+        type: Sequelize.INTEGER,
         primaryKey: true,
         allowNull: false,  
       },
@@ -12,7 +12,7 @@ module.exports = (sequelize, Sequelize) => {
         type: Sequelize.STRING
       },
       tipo_bien: {
-        type: Sequelize.TINYINT
+        type: Sequelize.INTEGER
       },
       nombre: {
         type: Sequelize.STRING
@@ -21,10 +21,10 @@ module.exports = (sequelize, Sequelize) => {
         type: Sequelize.STRING
       },
       material: {
-        type: Sequelize.TINYINT
+        type: Sequelize.INTEGER
       },
       tecnica: {
-        type: Sequelize.TINYINT
+        type: Sequelize.INTEGER
       },
       autor: {
         type: Sequelize.STRING
@@ -33,7 +33,7 @@ module.exports = (sequelize, Sequelize) => {
         type: Sequelize.STRING
       },
       anio: {
-        type: Sequelize.TINYINT
+        type: Sequelize.INTEGER
       },
       dimensiones: {
         type: Sequelize.STRING
@@ -45,13 +45,13 @@ module.exports = (sequelize, Sequelize) => {
         type: Sequelize.STRING
       },
       regimen: {
-        type: Sequelize.TINYINT
+        type: Sequelize.INTEGER
       },
       estado: {
-        type: Sequelize.TINYINT
+        type: Sequelize.INTEGER
       },
       estado_integridad: {
-        type: Sequelize.TINYINT
+        type: Sequelize.INTEGER
       },
       conservacion: {
         type: Sequelize.STRING
