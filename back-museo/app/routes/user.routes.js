@@ -31,4 +31,5 @@ module.exports = function(app) {
   );
 
   app.post("/api/auth/getuser", controller.getUser);
+
 };

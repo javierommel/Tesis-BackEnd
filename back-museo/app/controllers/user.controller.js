@@ -17,15 +17,27 @@ exports.moderatorBoard = (req, res) => {
 };
 
 exports.getUser = (req, res) => {
+  try {
+    const { page, pageSize } = req.body;
 
-  User.findAll({
-    attributes: ['id', 'name', 'email', 'password', 'fnacimiento']
-  })
-    .then(user => {
-      res.send({ data:user, message: "Consulta realizada correctamente!" });
-    }
-    )
-    .catch(err => {
-      res.status(500).send({ message: err.message });
-    });
+    const offset = (page - 1) * pageSize;
+
+    User.findAll({
+      attributes: ['id', 'name', 'email', 'password', 'fnacimiento'],
+      limit: pageSize,
+      offset: offset,
+    })
+      .then(user => {
+        res.send({ data: user, message: "Consulta realizada correctamente!" });
+      }
+      )
+      .catch(err => {
+        res.status(500).send({ message: err.message });
+      });
+  }
+  catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Error al recuperar usuarios.' });
+  }
 };
+

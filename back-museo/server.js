@@ -9,7 +9,7 @@ app.use(cors(corsOptions))
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
-db.sequelize.sync({force: true}).then(() => {
+db.sequelize.sync({alter: true}).then(() => {
     console.log('Drop and Resync Db');
     //initial();
   });
@@ -19,6 +19,7 @@ app.get("/", (req, res) => {
 //routes
 require('./app/routes/auth.routes')(app);
 require('./app/routes/user.routes')(app);
+require('./app/routes/piece.routes')(app);
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => { console.log(`Server is running on port ${PORT}`) });
 

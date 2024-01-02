@@ -17,7 +17,7 @@ module.exports = (sequelize, Sequelize) => {
       nombre: {
         type: Sequelize.STRING
       },
-      otra_nombre: {
+      otro_nombre: {
         type: Sequelize.STRING
       },
       material: {
@@ -40,6 +40,9 @@ module.exports = (sequelize, Sequelize) => {
       },
       inscripcion: {
         type: Sequelize.STRING
+      },
+      descripcion: {
+        type: Sequelize.TEXT
       },
       ubicacion: {
         type: Sequelize.STRING
