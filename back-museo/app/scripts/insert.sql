@@ -1,3 +1,8 @@
+/*TABLA ROLES*/
+INSERT INTO public.roles(id, name, estado, "createdAt", "updatedAt") VALUES (1, 'user', 1, current_timestamp, current_timestamp);
+INSERT INTO public.roles(id, name, estado, "createdAt", "updatedAt") VALUES (2, 'moderator', 1, current_timestamp, current_timestamp);
+INSERT INTO public.roles(id, name, estado, "createdAt", "updatedAt") VALUES (3, 'admin', 1, current_timestamp, current_timestamp);
+
 /*TABLA TIPOS*/
 INSERT INTO public.tipos(id, name, estado, "createdAt", "updatedAt") VALUES (1, 'Pintura', 1, current_timestamp, current_timestamp);
 INSERT INTO public.tipos(id, name, estado, "createdAt", "updatedAt") VALUES (2, 'Escultura', 1, current_timestamp, current_timestamp);
