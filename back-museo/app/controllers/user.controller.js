@@ -1,5 +1,6 @@
 const db = require("../models");
 const User = db.user;
+const Role = db.role;
 exports.allAccess = (req, res) => {
   res.status(200).send("Public Content.");
 };
@@ -23,14 +24,34 @@ exports.getUser = (req, res) => {
     const offset = (page - 1) * pageSize;
 
     User.findAll({
-      attributes: ['id', 'name', 'email', 'password', 'fnacimiento'],
+      attributes: ['id', 'name', 'email', 'password', 'fnacimiento', 'estado'],
       limit: pageSize,
       offset: offset,
+      include: {
+        model: db.role,
+        through: 'user_roles',
+        attributes: ['id'], // Selecciona solo el campo 'name' de la tabla 'role'
+      },
+    }).then(users => {
+      const usersWithRoles = users.map(user => {
+        const roles = user.roles.map(role => role.id).join(', ');
+        return {
+          id: user.id,
+          username: user.username,
+          email: user.email,
+          fnacimiento: user.fnacimiento,
+          estado: user.estado,
+          roles: roles,
+        };
+      });
+      Role.findAll({
+        attributes: ['id', 'name'],
+        where: { estado: 1 }
+      }).then(role => {
+        res.send({ roles: role, data: usersWithRoles, message: "Consulta realizada correctamente!" });
+      })
+
     })
-      .then(user => {
-        res.send({ data: user, message: "Consulta realizada correctamente!" });
-      }
-      )
       .catch(err => {
         res.status(500).send({ message: err.message });
       });

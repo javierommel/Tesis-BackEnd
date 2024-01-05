@@ -14,6 +14,7 @@ exports.signup = (req, res) => {
       email: req.body.email,
       password: bcrypt.hashSync(req.body.password, 8), 
       fnacimiento: req.body.fnacimiento,
+      estado: 1,
     })
       .then(user => {
         if (req.body.roles) {
@@ -42,7 +43,8 @@ exports.signup = (req, res) => {
   exports.signin = (req, res) => {
     User.findOne({
       where: {
-        email: req.body.username
+        email: req.body.username,
+        estado: 1,
       }
     })
       .then(user => {
@@ -71,9 +73,12 @@ exports.signup = (req, res) => {
                                 });
   
         var authorities = [];
+        var roles_usuario= [];
         user.getRoles().then(roles => {
           for (let i = 0; i < roles.length; i++) {
             authorities.push("ROLE_" + roles[i].name.toUpperCase());
+            roles_usuarios.push(roles[i].id);
+
           }
           res.status(200).send({
             id: user.id,
@@ -81,6 +86,7 @@ exports.signup = (req, res) => {
             email: user.email,
             fnacimiento: user.fnacimiento,
             roles: authorities,
+            roles_usuario: roles_usuario,
             accessToken: token
           });
         });
