@@ -31,13 +31,14 @@ db.type = require("../models/type.model.js")(sequelize, Sequelize);
 db.visit = require("../models/visit.model.js")(sequelize, Sequelize);
 db.material = require("../models/material.model.js")(sequelize, Sequelize);
 
-
+//Asociación usuario-roles
 db.role.belongsToMany(db.user, {
   through: "user_roles"
 });
 db.user.belongsToMany(db.role, {
   through: "user_roles"
 });
+
 db.ROLES = ["user", "admin", "moderator"];
 
 module.exports = db;

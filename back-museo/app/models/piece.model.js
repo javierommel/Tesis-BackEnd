@@ -1,3 +1,5 @@
+const { STRING } = require("sequelize");
+
 module.exports = (sequelize, Sequelize) => {
     const Piece = sequelize.define("piezas", {
       numero_ordinal: {
@@ -53,6 +55,9 @@ module.exports = (sequelize, Sequelize) => {
       estado: {
         type: Sequelize.INTEGER
       },
+      opcion_deterioro: {
+        type: Sequelize.INTEGER
+      },
       estado_integridad: {
         type: Sequelize.INTEGER
       },
@@ -60,6 +65,9 @@ module.exports = (sequelize, Sequelize) => {
         type: Sequelize.STRING
       },
       observacion: {
+        type: Sequelize.STRING
+      },
+      publicidad: {
         type: Sequelize.STRING
       },
       imagen1: {
@@ -85,8 +93,10 @@ module.exports = (sequelize, Sequelize) => {
       },
       registro_fotográfico: {
         type: Sequelize.STRING
+      },
+      usuario_modificacion: {
+        type: Sequelize.STRING
       }
-      
     });
   
     return Piece;
