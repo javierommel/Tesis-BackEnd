@@ -1,14 +1,19 @@
 module.exports = (sequelize, Sequelize) => {
-    const Type = sequelize.define("tipo", {
+    const Type = sequelize.define("tipos", {
       id: {
         type: Sequelize.INTEGER,
         primaryKey: true
       },
-      name: {
-        type: Sequelize.STRING
+      nombre: {
+        type: Sequelize.STRING,
+        allowNull: false,
       },
       estado: {
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
+        validate: {
+          // Solo se permiten los valores 0, 1 o 2
+          isOneOf: [0, 1, 2],
+        },
       }
     });
   

@@ -24,7 +24,7 @@ exports.getUser = (req, res) => {
     const offset = (page - 1) * pageSize;
 
     User.findAll({
-      attributes: ['id', 'name', 'email', 'password', 'fnacimiento', 'estado'],
+      attributes: ['usuario', 'nombre', 'email', 'password', 'fnacimiento', 'pais','estado'],
       limit: pageSize,
       offset: offset,
       include: {
@@ -36,16 +36,17 @@ exports.getUser = (req, res) => {
       const usersWithRoles = users.map(user => {
         const roles = user.roles.map(role => role.id).join(', ');
         return {
-          id: user.id,
-          username: user.username,
+          usuario: user.usuario,
+          nombre: user.nombre,
           email: user.email,
           fnacimiento: user.fnacimiento,
           estado: user.estado,
+          pais: user.pais,
           roles: roles,
         };
       });
       Role.findAll({
-        attributes: ['id', 'name'],
+        attributes: ['id', 'nombre'],
         where: { estado: 1 }
       }).then(role => {
         res.send({ roles: role, data: usersWithRoles, message: "Consulta realizada correctamente!" });

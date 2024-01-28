@@ -1,20 +1,32 @@
-module.exports = (sequelize, Sequelize) => {
+module.exports = (sequelize, Sequelize, DataTypes) => {
     const Recomendation = sequelize.define("recomendaciones", {
-      name: {
+      id: {
+        type: Sequelize.INTEGER,
+        primaryKey: true,
+      },
+      embedding: {
+        type: DataTypes.VECTOR(3)
+      },
+      titulo: {
         type: Sequelize.STRING
       },
-      email: {
+      texto: {
         type: Sequelize.STRING
       },
-      password: {
+      documento: {
         type: Sequelize.STRING
-      },
-      fnacimiento: {
-        type: Sequelize.DATEONLY
-      },
-      estado: {
-        type: Sequelize.INTEGER
       }
+    },
+    {
+      modelName: 'recomendaciones',
+      tableName: 'recomendaciones',
+      indexes: [
+        {
+          fields: ['embedding'],
+          using: 'hnsw',
+          operator: 'vector_cosine_ops'
+        }
+      ]
     });
   
     return Recomendation;

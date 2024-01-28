@@ -1,19 +1,17 @@
 module.exports = (sequelize, Sequelize) => {
     const Visit = sequelize.define("visitas", {
-      name: {
+      id: {
+        type: Sequelize.STRING,
+        primaryKey: true
+      },
+      usuario: {
         type: Sequelize.STRING
       },
-      email: {
-        type: Sequelize.STRING
-      },
-      password: {
-        type: Sequelize.STRING
-      },
-      fnacimiento: {
+      fecha_visita: {
         type: Sequelize.DATEONLY
       },
-      estado: {
-        type: Sequelize.INTEGER
+      pregunta: {
+        type: Sequelize.STRING
       }
     });
   

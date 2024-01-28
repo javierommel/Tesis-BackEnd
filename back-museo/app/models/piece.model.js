@@ -25,6 +25,9 @@ module.exports = (sequelize, Sequelize) => {
       material: {
         type: Sequelize.INTEGER
       },
+      otros_material: {
+        type: Sequelize.STRING
+      },
       tecnica: {
         type: Sequelize.INTEGER
       },
@@ -37,14 +40,26 @@ module.exports = (sequelize, Sequelize) => {
       anio: {
         type: Sequelize.INTEGER
       },
-      dimensiones: {
-        type: Sequelize.STRING
+      alto: {
+        type: Sequelize.FLOAT
+      },
+      ancho: {
+        type: Sequelize.FLOAT
+      },
+      diametro: {
+        type: Sequelize.INTEGER
+      },
+      espesor: {
+        type: Sequelize.FLOAT
+      },
+      peso: {
+        type: Sequelize.FLOAT
       },
       inscripcion: {
         type: Sequelize.STRING
       },
       descripcion: {
-        type: Sequelize.TEXT
+        type: Sequelize.STRING
       },
       ubicacion: {
         type: Sequelize.STRING
@@ -57,6 +72,9 @@ module.exports = (sequelize, Sequelize) => {
       },
       opcion_deterioro: {
         type: Sequelize.INTEGER
+      },
+      otros_deterioro: {
+        type: Sequelize.STRING
       },
       estado_integridad: {
         type: Sequelize.INTEGER

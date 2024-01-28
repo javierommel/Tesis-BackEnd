@@ -4,11 +4,17 @@ module.exports = (sequelize, Sequelize) => {
         type: Sequelize.INTEGER,
         primaryKey: true
       },
-      name: {
-        type: Sequelize.STRING
+      nombre: {
+        type: Sequelize.STRING,
+        allowNull: false,
       },
       estado: {
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        validate: {
+          // Solo se permiten los valores 0, 1 o 2
+          isOneOf: [0, 1, 2],
+        },
       }
     });
   

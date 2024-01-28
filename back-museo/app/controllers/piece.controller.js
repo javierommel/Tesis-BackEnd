@@ -13,7 +13,7 @@ exports.getPiece = (req, res) => {
     })
       .then(piece => {
         Type.findAll({
-          attributes: ['id','name']
+          attributes: ['id','nombre']
         }).then(type=>{
           res.send({ tipo:type, data:piece, message: "Consulta realizada correctamente!" });
         })

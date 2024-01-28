@@ -21,6 +21,9 @@ module.exports = {
     ecmaVersion: 'latest',
     sourceType: 'module',
   },
-  rules: {
-  },
+  rules: { 
+    'no-console': 'warn',
+    'no-use-before-define': 'warn', 
+    'spaced-comment': 'warn' 
+  }, 
 };
