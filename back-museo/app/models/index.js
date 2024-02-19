@@ -23,6 +23,7 @@ db.Sequelize=Sequelize
 db.sequelize = sequelize;
 
 db.user = require("../models/user.model.js")(sequelize, Sequelize);
+db.userhistory = require("../models/userhistory.model.js")(sequelize, Sequelize);
 db.role = require("../models/role.model.js")(sequelize, Sequelize);
 db.piece = require("../models/piece.model.js")(sequelize, Sequelize);
 db.comment = require("../models/comment.model.js")(sequelize, Sequelize);
@@ -107,7 +108,6 @@ db.piece.belongsTo(db.type, {
   targetKey: 'id', 
   as: 'tipo_id'
 });
-module.exports = db;
 
 //Asociación visitas-usuarios
 db.visit.belongsTo(db.user, {
@@ -115,3 +115,17 @@ db.visit.belongsTo(db.user, {
   targetKey: 'usuario', 
   as: 'usuario_id', 
 });
+
+//Asociación piezas-estados
+db.piece.belongsTo(db.user, {
+  foreignKey: 'usuario_modificacion', 
+  targetKey: 'usuario', 
+  as: 'usuario'
+});
+
+//Asociación usuario-usuario_historial
+db.user.hasMany(db.userhistory, { 
+  foreignKey: 'userId' 
+});
+
+module.exports = db;

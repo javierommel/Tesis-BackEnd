@@ -1,6 +1,7 @@
 const db = require("../models");
 const User = db.user;
 const Role = db.role;
+const UserHistory = db.userhistory;
 exports.allAccess = (req, res) => {
   res.status(200).send("Public Content.");
 };
@@ -24,8 +25,9 @@ exports.getUser = (req, res) => {
     const offset = (page - 1) * pageSize;
 
     User.findAll({
-      attributes: ['usuario', 'nombre', 'email', 'password', 'fnacimiento', 'pais','estado'],
+      attributes: ['usuario', 'nombre', 'email', 'password', 'fnacimiento', 'pais', 'estado'],
       limit: pageSize,
+      where: { estado: [0,1] },
       offset: offset,
       include: {
         model: db.role,
@@ -63,3 +65,86 @@ exports.getUser = (req, res) => {
   }
 };
 
+exports.deleteUser = (req, res) => {
+  try {
+    const { id, usuario_modificacion } = req.body;
+    console.log("usuario: "+id)
+    User.update(
+      {
+        usuario_modificacion: usuario_modificacion,
+        estado: 2,
+      },
+      { where: { usuario: id } }
+    ).then(usuarioModificado => {
+      UserHistory.create({
+        user_id: usuarioModificado.usuario,
+        tipo_accion: 'eliminacion',
+        datos_antiguos: usuarioModificado.previous(),
+        datos_nuevos: usuarioModificado.get(),
+        usuario_modificacion
+      });
+      res.send({ message: "Registro eliminado correctamente!" });
+    }).catch(err => {
+      res.status(500).send({ message: err.message });
+    });
+  }
+  catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Error al eliminar usuarios.' });
+  }
+};
+exports.updateUser = (req, res) => {
+  try {
+    const { id, data } = req.body;
+
+    Usuario.update(
+      {
+        data,
+      },
+      { where: { usuario: id } }
+    ).then(usuarioModificado => {
+      UserHistory.create({
+        user_id: usuarioModificado.usuario,
+        tipo_accion: 'modificacion',
+        datos_antiguos: usuarioModificado.previous(),
+        datos_nuevos: usuarioModificado.get(),
+        usuario_modificacion
+      });
+      res.send({ message: "Registro eliminado correctamente!" });
+    }).catch(err => {
+      res.status(500).send({ message: err.message });
+    });
+  }
+  catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Error al eliminar usuarios.' });
+  }
+};
+exports.addUser = (req, res) => {
+  try {
+    const { id, usuario_modificacion } = req.body;
+
+    Usuario.update(
+      {
+        usuario_modificacion,
+        estado: 2,
+      },
+      { where: { usuario: id } }
+    ).then(usuarioModificado => {
+      UserHistory.create({
+        user_id: usuarioModificado.usuario,
+        tipo_accion: 'creacion',
+        datos_antiguos: usuarioModificado.previous(),
+        datos_nuevos: usuarioModificado.get(),
+        usuario_modificacion
+      });
+      res.send({ message: "Registro eliminado correctamente!" });
+    }).catch(err => {
+      res.status(500).send({ message: err.message });
+    });
+  }
+  catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Error al eliminar usuarios.' });
+  }
+};
