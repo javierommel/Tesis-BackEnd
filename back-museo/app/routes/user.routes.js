@@ -34,4 +34,6 @@ module.exports = function(app) {
 
   app.post("/api/auth/deleteuser", controller.deleteUser);
 
+  app.post("/api/auth/updateuser", controller.updateUser);
+
 };

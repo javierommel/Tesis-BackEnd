@@ -2,6 +2,9 @@ const db = require("../models");
 const User = db.user;
 const Role = db.role;
 const UserHistory = db.userhistory;
+const sequelize = db.sequelize;
+var bcrypt = require("bcryptjs");
+
 exports.allAccess = (req, res) => {
   res.status(200).send("Public Content.");
 };
@@ -27,7 +30,7 @@ exports.getUser = (req, res) => {
     User.findAll({
       attributes: ['usuario', 'nombre', 'email', 'password', 'fnacimiento', 'pais', 'estado'],
       limit: pageSize,
-      where: { estado: [0,1] },
+      where: { estado: [0, 1] },
       offset: offset,
       include: {
         model: db.role,
@@ -65,86 +68,110 @@ exports.getUser = (req, res) => {
   }
 };
 
-exports.deleteUser = (req, res) => {
+exports.deleteUser = async (req, res) => {
+  let t;
+
   try {
     const { id, usuario_modificacion } = req.body;
-    console.log("usuario: "+id)
-    User.update(
+    t = await sequelize.transaction();
+    // Busca el usuario antes de la actualización
+    const userAntes = await User.findOne({ where: { usuario: id }, transaction: t });
+    // Actualiza el usuario
+    const [numFilasAfectadas] = await User.update(
       {
         usuario_modificacion: usuario_modificacion,
         estado: 2,
       },
-      { where: { usuario: id } }
-    ).then(usuarioModificado => {
-      UserHistory.create({
-        user_id: usuarioModificado.usuario,
+      { where: { usuario: id }, transaction: t }
+    );
+    if (numFilasAfectadas > 0) {
+      // Busca el usuario después de la actualización
+      const userDespues = await User.findOne({ where: { usuario: id }, returning: true, transaction: t });
+      // Crea el historial del usuario dentro de la transacción
+      await UserHistory.create({
+        user_id: userDespues.usuario,
         tipo_accion: 'eliminacion',
-        datos_antiguos: usuarioModificado.previous(),
-        datos_nuevos: usuarioModificado.get(),
-        usuario_modificacion
-      });
+        datos_antiguos: userAntes,
+        datos_nuevos: userDespues.get(),
+        usuario_modificacion: usuario_modificacion
+      }, { transaction: t });
+      // Confirma la transacción
+      await t.commit();
       res.send({ message: "Registro eliminado correctamente!" });
-    }).catch(err => {
-      res.status(500).send({ message: err.message });
-    });
-  }
-  catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Error al eliminar usuarios.' });
+    } else {
+      // Si no se actualizó ningún usuario, revierte la transacción
+      await t.rollback();
+      res.status(404).send({ message: "Usuario no encontrado para eliminación." });
+    }
+  } catch (err) {
+    if (t) {
+      await t.rollback();
+    }
+    res.status(500).send({ message: err.message || "Error al eliminar usuarios." });
   }
 };
-exports.updateUser = (req, res) => {
-  try {
-    const { id, data } = req.body;
 
-    Usuario.update(
-      {
-        data,
-      },
-      { where: { usuario: id } }
-    ).then(usuarioModificado => {
-      UserHistory.create({
-        user_id: usuarioModificado.usuario,
-        tipo_accion: 'modificacion',
-        datos_antiguos: usuarioModificado.previous(),
-        datos_nuevos: usuarioModificado.get(),
-        usuario_modificacion
-      });
-      res.send({ message: "Registro eliminado correctamente!" });
-    }).catch(err => {
-      res.status(500).send({ message: err.message });
-    });
-  }
-  catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Error al eliminar usuarios.' });
-  }
-};
-exports.addUser = (req, res) => {
+exports.updateUser = async (req, res) => {
+  let t;
   try {
-    const { id, usuario_modificacion } = req.body;
-
-    Usuario.update(
-      {
-        usuario_modificacion,
-        estado: 2,
-      },
-      { where: { usuario: id } }
-    ).then(usuarioModificado => {
-      UserHistory.create({
-        user_id: usuarioModificado.usuario,
-        tipo_accion: 'creacion',
-        datos_antiguos: usuarioModificado.previous(),
-        datos_nuevos: usuarioModificado.get(),
-        usuario_modificacion
-      });
-      res.send({ message: "Registro eliminado correctamente!" });
-    }).catch(err => {
-      res.status(500).send({ message: err.message });
+    const { id, data, roles, usuario_modificacion } = req.body;
+    console.log("data: " + JSON.stringify(data))
+    if (data.password) data.password = bcrypt.hashSync(data.password, 8);
+    t = await sequelize.transaction();
+    // Busca el usuario antes de la actualización
+    const userAntes = await User.findOne({ where: { usuario: id }, transaction: t });
+    // Construye el objeto de datos a actualizar
+    const datosAActualizar = {};
+    Object.keys(data).forEach(campo => {
+      datosAActualizar[campo] = data[campo];
     });
-  }
-  catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Error al eliminar usuarios.' });
+    // Agrega el campo usuario_modificacion si no está presente
+    datosAActualizar['usuario_modificacion'] = usuario_modificacion;
+    // Actualiza el usuario
+    const [numFilasAfectadas] = await User.update(
+      datosAActualizar,
+      { where: { usuario: id }, transaction: t }
+    );
+    if (numFilasAfectadas > 0) {
+      // Busca el usuario después de la actualización
+      const userDespues = await User.findOne({ where: { usuario: id }, returning: true, transaction: t });
+      // Elimina roles existentes y establece nuevos roles
+      // Obtiene los roles actuales del usuario
+      const rolesActuales = await userDespues.getRoles();
+      // Elimina los roles actuales
+      await userDespues.removeRoles(rolesActuales, { transaction: t });
+      console.log("roles1: " + roles)
+      if (roles) {
+        const rolesEncontrados = await Role.findAll({
+          where: {
+            nombre: {
+              [Op.or]: roles
+            }
+          },
+          transaction: t
+        });
+        await userDespues.setRoles(rolesEncontrados, { transaction: t });
+      } else {
+        await userDespues.setRoles([1], { transaction: t });
+      }
+      // Crea el historial del usuario dentro de la transacción
+      await UserHistory.create({
+        user_id: userDespues.usuario,
+        tipo_accion: 'modificación',
+        datos_antiguos: userAntes,
+        datos_nuevos: userDespues.get(),
+        usuario_modificacion: usuario_modificacion
+      }, { transaction: t });
+      await t.commit();
+      res.send({ message: "Usuario modificado correctamente!" });
+    } else {
+      await t.rollback();
+      res.status(404).send({ message: "Usuario no encontrado para modificación." });
+    }
+  } catch (err) {
+    if (t) {
+      await t.rollback();
+    }
+    res.status(500).send({ message: err.message || 'Error al modificar usuarios.' });
   }
 };

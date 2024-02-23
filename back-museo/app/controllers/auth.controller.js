@@ -1,48 +1,58 @@
 const db = require("../models");
 const config = require("../config/auth.config");
 const User = db.user;
+const UserHistory = db.userhistory;
 const Role = db.role;
 const Op = db.Sequelize.Op;
+const sequelize = db.sequelize;
 
 var jwt = require("jsonwebtoken");
 var bcrypt = require("bcryptjs");
 
-exports.signup = (req, res) => {
-
-  User.create({
-    usuario: req.body.user,
-    nombre: req.body.name,
-    email: req.body.email,
-    password: bcrypt.hashSync(req.body.password, 8),
-    fnacimiento: req.body.nacimiento,
-    pais: req.body.pais,
-    estado: 1,
-    usuario_modificacion: req.body.usuario_modificacion,
-  })
-    .then(user => {
-      if (req.body.roles) {
-        Role.findAll({
-          where: {
-            nombre: {
-              [Op.or]: req.body.roles
-            }
+exports.signup = async (req, res) => {
+  let t;
+  try {
+    t = await sequelize.transaction();
+    // Crea el usuario
+    const user = await User.create({
+      usuario: req.body.user,
+      nombre: req.body.name,
+      email: req.body.email,
+      password: bcrypt.hashSync(req.body.password, 8),
+      fnacimiento: req.body.nacimiento,
+      pais: req.body.pais,
+      estado: 1,
+      usuario_modificacion: req.body.usuario_modificacion,
+    }, { transaction: t });
+    // Asigna roles al usuario
+    if (req.body.roles) {
+      const roles = await Role.findAll({
+        where: {
+          nombre: {
+            [Op.or]: req.body.roles
           }
-        }).then(roles => {
-          user.setRoles(roles).then(() => {
-            res.send({ message: "Usuario registrado correctamente!" });
-          });
-        });
-      } else {
-        // user role = 1
-        console.log("por aquis")
-        user.setRoles([1]).then(() => {
-          res.send({ message: "Usuario registrado correctamente!" });
-        });
-      }
-    })
-    .catch(err => {
-      res.status(500).send({ message: err });
-    });
+        }
+      });
+      await user.setRoles(roles, { transaction: t });
+    } else {
+      await user.setRoles([1], { transaction: t });
+    }
+    // Crea el historial del usuario dentro de la transacción
+    await UserHistory.create({
+      user_id: user.usuario,
+      tipo_accion: 'creación',
+      datos_antiguos: null,
+      datos_nuevos: null,
+      usuario_modificacion: req.body.usuario_modificacion
+    }, { transaction: t });
+    await t.commit();
+    res.send({ message: "Usuario registrado correctamente!" });
+  } catch (err) {
+    if (t) {
+      await t.rollback();
+    }
+    res.status(500).send({ message: err.message || "Error al registrar el usuario." });
+  }
 };
 exports.signin = (req, res) => {
   User.findOne({
