@@ -97,7 +97,7 @@ exports.deleteUser = async (req, res) => {
       }, { transaction: t });
       // Confirma la transacción
       await t.commit();
-      res.send({ message: "Registro eliminado correctamente!" });
+      res.send({ message: "Usuario eliminado correctamente!" });
     } else {
       // Si no se actualizó ningún usuario, revierte la transacción
       await t.rollback();
