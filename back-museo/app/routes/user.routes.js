@@ -31,6 +31,8 @@ module.exports = function(app) {
   );
 
   app.post("/api/auth/getuser", controller.getUser);
+  
+  app.post("/api/auth/getuserid", controller.getUserId);
 
   app.post("/api/auth/deleteuser", controller.deleteUser);
 

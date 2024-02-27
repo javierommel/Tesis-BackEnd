@@ -175,3 +175,36 @@ exports.updateUser = async (req, res) => {
     res.status(500).send({ message: err.message || 'Error al modificar usuarios.' });
   }
 };
+
+exports.getUserId = (req, res) => {
+  try {
+    const { usuario } = req.body;
+    User.findAll({
+      attributes: ['usuario', 'nombre', 'email', 'password', 'fnacimiento', 'pais', 'estado', 'avatar'],
+      where: {
+        usuario: usuario,
+        estado: [1]
+      },
+    }).then(user => {
+      console.log("user"+JSON.stringify(user))
+      const data = user.length>0?{
+        usuario: user[0].usuario,
+        nombre: user[0].nombre,
+        email: user[0].email,
+        fnacimiento: user[0].fnacimiento,
+        estado: user[0].estado,
+        pais: user[0].pais,
+        avatar: user[0].avatar,
+      }:null;
+      res.send({ data: data, message: "Consulta realizada correctamente!" });
+
+    })
+      .catch(err => {
+        res.status(500).send({ message: err.message });
+      });
+  }
+  catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Error al recuperar usuarios.' });
+  }
+};
