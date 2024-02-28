@@ -3,6 +3,7 @@ const User = db.user;
 const Role = db.role;
 const UserHistory = db.userhistory;
 const sequelize = db.sequelize;
+const Op = db.Sequelize.Op;
 var bcrypt = require("bcryptjs");
 
 exports.allAccess = (req, res) => {
@@ -116,16 +117,18 @@ exports.updateUser = async (req, res) => {
   try {
     const { id, data, roles, usuario_modificacion } = req.body;
     console.log("data: " + JSON.stringify(data))
-    if (data.password) data.password = bcrypt.hashSync(data.password, 8);
+    
     t = await sequelize.transaction();
     // Busca el usuario antes de la actualización
     const userAntes = await User.findOne({ where: { usuario: id }, transaction: t });
     // Construye el objeto de datos a actualizar
     const datosAActualizar = {};
-    Object.keys(data).forEach(campo => {
-      datosAActualizar[campo] = data[campo];
-    });
-    // Agrega el campo usuario_modificacion si no está presente
+    datosAActualizar["usuario"]=data.username;
+    datosAActualizar["nombre"]=data.name;
+    datosAActualizar["email"]=data.email;
+    if (data.password!=="") datosAActualizar["password"]=bcrypt.hashSync(data.password, 8);
+    datosAActualizar["pais"]=data.country;
+    datosAActualizar["fnacimiento"]=data.year;
     datosAActualizar['usuario_modificacion'] = usuario_modificacion;
     // Actualiza el usuario
     const [numFilasAfectadas] = await User.update(
@@ -140,7 +143,7 @@ exports.updateUser = async (req, res) => {
       const rolesActuales = await userDespues.getRoles();
       // Elimina los roles actuales
       await userDespues.removeRoles(rolesActuales, { transaction: t });
-      console.log("roles1: " + roles)
+      
       if (roles) {
         const rolesEncontrados = await Role.findAll({
           where: {
@@ -169,6 +172,7 @@ exports.updateUser = async (req, res) => {
       res.status(404).send({ message: "Usuario no encontrado para modificación." });
     }
   } catch (err) {
+    console.error(err.stack);
     if (t) {
       await t.rollback();
     }
