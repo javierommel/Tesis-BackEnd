@@ -14,7 +14,7 @@ module.exports = (sequelize, Sequelize) => {
       allowNull: false,
       validate: {
         // Solo se permiten los valores 0, 1 o 2
-        isOneOf: [1, 2, 3, 4, 5],
+        isIn: [[1, 2, 3, 4, 5]],
       },
     },
     comentario: {
@@ -29,7 +29,7 @@ module.exports = (sequelize, Sequelize) => {
       allowNull: false,
       validate: {
         // Solo se permiten los valores 0, 1 o 2
-        isOneOf: [0, 1, 2],
+        isIn: [[0, 1, 2]],
       },
     },
     usuario_modificacion: {

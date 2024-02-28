@@ -115,9 +115,9 @@ exports.deleteUser = async (req, res) => {
 exports.updateUser = async (req, res) => {
   let t;
   try {
-    const { id, data, roles, usuario_modificacion } = req.body;
+    const { id, data, roles, usuario_modificacion, image } = req.body;
     console.log("data: " + JSON.stringify(data))
-    
+    console.log("iamge: "+image)
     t = await sequelize.transaction();
     // Busca el usuario antes de la actualización
     const userAntes = await User.findOne({ where: { usuario: id }, transaction: t });
@@ -127,6 +127,7 @@ exports.updateUser = async (req, res) => {
     datosAActualizar["nombre"]=data.name;
     datosAActualizar["email"]=data.email;
     if (data.password!=="") datosAActualizar["password"]=bcrypt.hashSync(data.password, 8);
+    if (image) datosAActualizar["avatar"]=image;
     datosAActualizar["pais"]=data.country;
     datosAActualizar["fnacimiento"]=data.year;
     datosAActualizar['usuario_modificacion'] = usuario_modificacion;
