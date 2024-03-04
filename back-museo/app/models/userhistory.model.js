@@ -1,5 +1,5 @@
 module.exports = (sequelize, Sequelize) => {
-  const UserHistory = sequelize.define("historial_usuarios", {
+  const UserHistory = sequelize.define('historial_usuarios', {
     id: {
       type: Sequelize.INTEGER,
       primaryKey: true,

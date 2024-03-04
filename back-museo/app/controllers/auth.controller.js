@@ -1,13 +1,14 @@
-const db = require("../models");
-const config = require("../config/auth.config");
+const db = require('../models');
+const config = require('../config/auth.config');
+
 const User = db.user;
 const UserHistory = db.userhistory;
 const Role = db.role;
-const Op = db.Sequelize.Op;
-const sequelize = db.sequelize;
+const { Op } = db.Sequelize;
+const { sequelize } = db;
 
-var jwt = require("jsonwebtoken");
-var bcrypt = require("bcryptjs");
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
 
 exports.signup = async (req, res) => {
   let t;
@@ -29,9 +30,9 @@ exports.signup = async (req, res) => {
       const roles = await Role.findAll({
         where: {
           nombre: {
-            [Op.or]: req.body.roles
-          }
-        }
+            [Op.or]: req.body.roles,
+          },
+        },
       });
       await user.setRoles(roles, { transaction: t });
     } else {
@@ -43,15 +44,15 @@ exports.signup = async (req, res) => {
       tipo_accion: 'creación',
       datos_antiguos: null,
       datos_nuevos: null,
-      usuario_modificacion: req.body.usuario_modificacion
+      usuario_modificacion: req.body.usuario_modificacion,
     }, { transaction: t });
     await t.commit();
-    res.send({ message: "Usuario registrado correctamente!" });
+    res.send({ message: 'Usuario registrado correctamente!' });
   } catch (err) {
     if (t) {
       await t.rollback();
     }
-    res.status(500).send({ message: err.message || "Error al registrar el usuario." });
+    res.status(500).send({ message: err.message || 'Error al registrar el usuario.' });
   }
 };
 exports.signin = (req, res) => {
@@ -59,59 +60,60 @@ exports.signin = (req, res) => {
     where: {
       [Op.or]: [
         {
-          usuario: req.body.user
+          usuario: req.body.user,
         },
         {
-          email: req.body.user
+          email: req.body.user,
         },
       ],
       estado: 1,
-    }
+    },
   })
-    .then(user => {
+    .then((user) => {
       if (!user) {
-        return res.status(404).send({ message: "Usuario no encontrado." });
+        return res.status(404).send({ message: 'Usuario no encontrado.' });
       }
 
-      var passwordIsValid = bcrypt.compareSync(
+      const passwordIsValid = bcrypt.compareSync(
         req.body.password,
-        user.password
+        user.password,
       );
 
       if (!passwordIsValid) {
         return res.status(401).send({
           accessToken: null,
-          message: "Password incorrecto!"
+          message: 'Password incorrecto!',
         });
       }
 
-      const token = jwt.sign({ id: user.id },
+      const token = jwt.sign(
+        { id: user.id },
         config.secret,
         {
           algorithm: 'HS256',
           allowInsecureKeySizes: true,
           expiresIn: 86400, // 24 hours
-        });
+        },
+      );
 
-      var authorities = [];
-      var roles_usuario = [];
-      user.getRoles().then(roles => {
+      const authorities = [];
+      const roles_usuario = [];
+      user.getRoles().then((roles) => {
         for (let i = 0; i < roles.length; i++) {
-          authorities.push("ROLE_" + roles[i].nombre.toUpperCase());
+          authorities.push(`ROLE_${roles[i].nombre.toUpperCase()}`);
           roles_usuario.push(roles[i].id);
-
         }
         res.status(200).send({
           id: user.usuario,
           name: user.nombre,
           email: user.email,
           roles: authorities,
-          roles_usuario: roles_usuario,
-          accessToken: token
+          roles_usuario,
+          accessToken: token,
         });
       });
     })
-    .catch(err => {
+    .catch((err) => {
       res.status(500).send({ message: err.message });
     });
 };

@@ -1,21 +1,23 @@
 module.exports = (sequelize, Sequelize, DataTypes) => {
-    const Recomendation = sequelize.define("recomendaciones", {
+  const Recomendation = sequelize.define(
+    'recomendaciones',
+    {
       id: {
         type: Sequelize.INTEGER,
         primaryKey: true,
       },
       embedding: {
-        type: DataTypes.VECTOR(3)
+        type: DataTypes.VECTOR(3),
       },
       titulo: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
       },
       texto: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
       },
       documento: {
-        type: Sequelize.STRING
-      }
+        type: Sequelize.STRING,
+      },
     },
     {
       modelName: 'recomendaciones',
@@ -24,11 +26,11 @@ module.exports = (sequelize, Sequelize, DataTypes) => {
         {
           fields: ['embedding'],
           using: 'hnsw',
-          operator: 'vector_cosine_ops'
-        }
-      ]
-    });
-  
-    return Recomendation;
+          operator: 'vector_cosine_ops',
+        },
+      ],
+    },
+  );
 
-  };
+  return Recomendation;
+};

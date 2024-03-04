@@ -1,5 +1,5 @@
 module.exports = (sequelize, Sequelize) => {
-  const Comment = sequelize.define("comentarios", {
+  const Comment = sequelize.define('comentarios', {
     id: {
       type: Sequelize.INTEGER,
       primaryKey: true,
@@ -18,7 +18,7 @@ module.exports = (sequelize, Sequelize) => {
       },
     },
     comentario: {
-      type: Sequelize.STRING
+      type: Sequelize.STRING,
     },
     fecha_registro: {
       type: Sequelize.DATE,
@@ -35,9 +35,8 @@ module.exports = (sequelize, Sequelize) => {
     usuario_modificacion: {
       type: Sequelize.STRING,
       allowNull: false,
-    }
+    },
   });
 
   return Comment;
-
 };

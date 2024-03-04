@@ -4,7 +4,7 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "start": "concurrently \"npm:lint\" \"npm:dev\"",
+    "start": "nodemon --exec 'eslint app --fix && node'",
     "dev": "nodemon server.js",
     "lint": "eslint ."
   },
@@ -19,6 +19,7 @@
   "license": "ISC",
   "dependencies": {
     "bcryptjs": "^2.4.3",
+    "concurrently": "^8.2.2",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
@@ -33,7 +34,6 @@
     "whisper-node": "^0.2.12"
   },
   "devDependencies": {
-    "concurrently": "^8.2.2",
     "eslint": "^8.56.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-plugin-import": "^2.29.1",

@@ -1,5 +1,5 @@
 module.exports = (sequelize, Sequelize) => {
-  const User = sequelize.define("usuarios", {
+  const User = sequelize.define('usuarios', {
     usuario: {
       type: Sequelize.STRING,
       primaryKey: true,
@@ -18,7 +18,7 @@ module.exports = (sequelize, Sequelize) => {
       allowNull: false,
     },
     fnacimiento: {
-      type: Sequelize.INTEGER
+      type: Sequelize.INTEGER,
     },
     estado: {
       type: Sequelize.INTEGER,

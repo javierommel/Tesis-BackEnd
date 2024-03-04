@@ -1,26 +1,27 @@
-const db = require("../models");
+const db = require('../models');
+
 const User = db.user;
 const Role = db.role;
 const UserHistory = db.userhistory;
-const sequelize = db.sequelize;
-const Op = db.Sequelize.Op;
+const { sequelize } = db;
+const { Op } = db.Sequelize;
 const fs = require('fs');
-var bcrypt = require("bcryptjs");
+const bcrypt = require('bcryptjs');
 
 exports.allAccess = (req, res) => {
-  res.status(200).send("Public Content.");
+  res.status(200).send('Public Content.');
 };
 
 exports.userBoard = (req, res) => {
-  res.status(200).send("User Content.");
+  res.status(200).send('User Content.');
 };
 
 exports.adminBoard = (req, res) => {
-  res.status(200).send("Admin Content.");
+  res.status(200).send('Admin Content.');
 };
 
 exports.moderatorBoard = (req, res) => {
-  res.status(200).send("Moderator Content.");
+  res.status(200).send('Moderator Content.');
 };
 
 exports.getUser = (req, res) => {
@@ -33,15 +34,15 @@ exports.getUser = (req, res) => {
       attributes: ['usuario', 'nombre', 'email', 'password', 'fnacimiento', 'pais', 'estado'],
       limit: pageSize,
       where: { estado: [0, 1] },
-      offset: offset,
+      offset,
       include: {
         model: db.role,
         through: 'user_roles',
         attributes: ['id'], // Selecciona solo el campo 'name' de la tabla 'role'
       },
-    }).then(users => {
-      const usersWithRoles = users.map(user => {
-        const roles = user.roles.map(role => role.id).join(', ');
+    }).then((users) => {
+      const usersWithRoles = users.map((user) => {
+        const roles = user.roles.map((role) => role.id).join(', ');
         return {
           usuario: user.usuario,
           nombre: user.nombre,
@@ -49,22 +50,20 @@ exports.getUser = (req, res) => {
           fnacimiento: user.fnacimiento,
           estado: user.estado,
           pais: user.pais,
-          roles: roles,
+          roles,
         };
       });
       Role.findAll({
         attributes: ['id', 'nombre'],
-        where: { estado: 1 }
-      }).then(role => {
-        res.send({ roles: role, data: usersWithRoles, message: "Consulta realizada correctamente!" });
-      })
-
+        where: { estado: 1 },
+      }).then((role) => {
+        res.send({ roles: role, data: usersWithRoles, message: 'Consulta realizada correctamente!' });
+      });
     })
-      .catch(err => {
+      .catch((err) => {
         res.status(500).send({ message: err.message });
       });
-  }
-  catch (err) {
+  } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Error al recuperar usuarios.' });
   }
@@ -81,10 +80,10 @@ exports.deleteUser = async (req, res) => {
     // Actualiza el usuario
     const [numFilasAfectadas] = await User.update(
       {
-        usuario_modificacion: usuario_modificacion,
+        usuario_modificacion,
         estado: 2,
       },
-      { where: { usuario: id }, transaction: t }
+      { where: { usuario: id }, transaction: t },
     );
     if (numFilasAfectadas > 0) {
       // Busca el usuario después de la actualización
@@ -95,44 +94,46 @@ exports.deleteUser = async (req, res) => {
         tipo_accion: 'eliminacion',
         datos_antiguos: userAntes,
         datos_nuevos: userDespues.get(),
-        usuario_modificacion: usuario_modificacion
+        usuario_modificacion,
       }, { transaction: t });
       // Confirma la transacción
       await t.commit();
-      res.send({ message: "Usuario eliminado correctamente!" });
+      res.send({ message: 'Usuario eliminado correctamente!' });
     } else {
       // Si no se actualizó ningún usuario, revierte la transacción
       await t.rollback();
-      res.status(404).send({ message: "Usuario no encontrado para eliminación." });
+      res.status(404).send({ message: 'Usuario no encontrado para eliminación.' });
     }
   } catch (err) {
     if (t) {
       await t.rollback();
     }
-    res.status(500).send({ message: err.message || "Error al eliminar usuarios." });
+    res.status(500).send({ message: err.message || 'Error al eliminar usuarios.' });
   }
 };
 
 exports.updateUser = async (req, res) => {
   let t;
   try {
-    const { id, data, roles, usuario_modificacion } = req.body;
+    const {
+      id, data, roles, usuario_modificacion,
+    } = req.body;
     t = await sequelize.transaction();
     // Busca el usuario antes de la actualización
     const userAntes = await User.findOne({ where: { usuario: id }, transaction: t });
     // Construye el objeto de datos a actualizar
     const datosAActualizar = {};
-    datosAActualizar["usuario"] = data.username;
-    datosAActualizar["nombre"] = data.name;
-    datosAActualizar["email"] = data.email;
-    if (data.password !== "") datosAActualizar["password"] = bcrypt.hashSync(data.password, 8);
-    datosAActualizar["pais"] = data.country;
-    datosAActualizar["fnacimiento"] = data.year;
-    datosAActualizar['usuario_modificacion'] = usuario_modificacion;
+    datosAActualizar.usuario = data.username;
+    datosAActualizar.nombre = data.name;
+    datosAActualizar.email = data.email;
+    if (data.password !== '') datosAActualizar.password = bcrypt.hashSync(data.password, 8);
+    datosAActualizar.pais = data.country;
+    datosAActualizar.fnacimiento = data.year;
+    datosAActualizar.usuario_modificacion = usuario_modificacion;
     // Actualiza el usuario
     const [numFilasAfectadas] = await User.update(
       datosAActualizar,
-      { where: { usuario: id }, transaction: t }
+      { where: { usuario: id }, transaction: t },
     );
 
     if (numFilasAfectadas > 0) {
@@ -148,10 +149,10 @@ exports.updateUser = async (req, res) => {
         const rolesEncontrados = await Role.findAll({
           where: {
             nombre: {
-              [Op.or]: roles
-            }
+              [Op.or]: roles,
+            },
           },
-          transaction: t
+          transaction: t,
         });
         await userDespues.setRoles(rolesEncontrados, { transaction: t });
       } else {
@@ -163,13 +164,13 @@ exports.updateUser = async (req, res) => {
         tipo_accion: 'modificación',
         datos_antiguos: userAntes,
         datos_nuevos: userDespues.get(),
-        usuario_modificacion: usuario_modificacion
+        usuario_modificacion,
       }, { transaction: t });
       await t.commit();
-      res.send({ message: "Usuario modificado correctamente!" });
+      res.send({ message: 'Usuario modificado correctamente!' });
     } else {
       await t.rollback();
-      res.status(404).send({ message: "Usuario no encontrado para modificación." });
+      res.status(404).send({ message: 'Usuario no encontrado para modificación.' });
     }
   } catch (err) {
     console.error(err.stack);
@@ -186,11 +187,11 @@ exports.getUserId = (req, res) => {
     User.findAll({
       attributes: ['usuario', 'nombre', 'email', 'password', 'fnacimiento', 'pais', 'estado', 'avatar'],
       where: {
-        usuario: usuario,
-        estado: [1]
+        usuario,
+        estado: [1],
       },
-    }).then(user => {
-      //console.log("user" + JSON.stringify(user))
+    }).then((user) => {
+      // console.log("user" + JSON.stringify(user))
       const data = user.length > 0 ? {
         usuario: user[0].usuario,
         nombre: user[0].nombre,
@@ -200,14 +201,12 @@ exports.getUserId = (req, res) => {
         pais: user[0].pais,
         avatar: user[0].avatar,
       } : null;
-      res.send({ data: data, message: "Consulta realizada correctamente!" });
-
+      res.send({ data, message: 'Consulta realizada correctamente!' });
     })
-      .catch(err => {
+      .catch((err) => {
         res.status(500).send({ message: err.message });
       });
-  }
-  catch (err) {
+  } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Error al recuperar usuarios.' });
   }
@@ -216,15 +215,15 @@ exports.getUserId = (req, res) => {
 exports.updateUserProfile = async (req, res) => {
   let t;
   try {
-    console.log("data: " + JSON.stringify(req.body))
-    const  id=req.body.id;
-    const data= JSON.parse(req.body.data);
-    const roles=req.body.roles;
-    const usuario_modificacion = req.body.usuario_modificacion;
-//    console.log("data: " + JSON.stringify(data))
-//    console.log("iamge: " + image)
+    console.log(`data: ${JSON.stringify(req.body)}`);
+    const { id } = req.body;
+    const data = JSON.parse(req.body.data);
+    const { roles } = req.body;
+    const { usuario_modificacion } = req.body;
+    //    console.log("data: " + JSON.stringify(data))
+    //    console.log("iamge: " + image)
     const { originalname, path, mimetype } = req.file;
-    console.log("imagen: " + originalname + " " + path + mimetype)
+    console.log(`imagen: ${originalname} ${path}${mimetype}`);
     // Lee la imagen desde el servidor
     const image = fs.readFileSync(path);
     t = await sequelize.transaction();
@@ -232,18 +231,18 @@ exports.updateUserProfile = async (req, res) => {
     const userAntes = await User.findOne({ where: { usuario: id }, transaction: t });
     // Construye el objeto de datos a actualizar
     const datosAActualizar = {};
-    datosAActualizar["usuario"] = data.username;
-    datosAActualizar["nombre"] = data.name;
-    datosAActualizar["email"] = data.email;
-    if (data.password !== "") datosAActualizar["password"] = bcrypt.hashSync(data.password, 8);
-    if (image) datosAActualizar["avatar"] = image;
-    datosAActualizar["pais"] = data.country;
-    datosAActualizar["fnacimiento"] = data.year;
-    datosAActualizar['usuario_modificacion'] = usuario_modificacion;
+    datosAActualizar.usuario = data.username;
+    datosAActualizar.nombre = data.name;
+    datosAActualizar.email = data.email;
+    if (data.password !== '') datosAActualizar.password = bcrypt.hashSync(data.password, 8);
+    if (image) datosAActualizar.avatar = image;
+    datosAActualizar.pais = data.country;
+    datosAActualizar.fnacimiento = data.year;
+    datosAActualizar.usuario_modificacion = usuario_modificacion;
     // Actualiza el usuario
     const [numFilasAfectadas] = await User.update(
       datosAActualizar,
-      { where: { usuario: id }, transaction: t }
+      { where: { usuario: id }, transaction: t },
     );
     fs.unlinkSync(path);
 
@@ -260,10 +259,10 @@ exports.updateUserProfile = async (req, res) => {
         const rolesEncontrados = await Role.findAll({
           where: {
             nombre: {
-              [Op.or]: roles
-            }
+              [Op.or]: roles,
+            },
           },
-          transaction: t
+          transaction: t,
         });
         await userDespues.setRoles(rolesEncontrados, { transaction: t });
       } else {
@@ -275,13 +274,13 @@ exports.updateUserProfile = async (req, res) => {
         tipo_accion: 'modificación',
         datos_antiguos: userAntes,
         datos_nuevos: userDespues.get(),
-        usuario_modificacion: usuario_modificacion
+        usuario_modificacion,
       }, { transaction: t });
       await t.commit();
-      res.send({ message: "Usuario modificado correctamente!" });
+      res.send({ message: 'Usuario modificado correctamente!' });
     } else {
       await t.rollback();
-      res.status(404).send({ message: "Usuario no encontrado para modificación." });
+      res.status(404).send({ message: 'Usuario no encontrado para modificación.' });
     }
   } catch (err) {
     console.error(err.stack);
