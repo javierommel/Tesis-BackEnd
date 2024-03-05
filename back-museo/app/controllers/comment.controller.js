@@ -33,6 +33,9 @@ exports.getCommentList = (req, res) => {
       limit: pageSize,
       where: { estado: [0, 1] },
       offset,
+      order: [
+        ['fecha_registro', 'DESC'],
+      ],
     }).then((comments) => {
       const data = comments.length > 0 ? comments : null;
       res.send({ data, message: 'Consulta realizada correctamente!' });
@@ -85,6 +88,9 @@ exports.getComment = (req, res) => {
         attributes: ['nombre', 'avatar'],
         as: 'usuario_id',
       },
+      order: [
+        ['fecha_registro', 'DESC'],
+      ],
     }).then((comments) => {
       const data = comments.length > 0 ? comments : null;
       User.findAll({
@@ -130,8 +136,9 @@ exports.updateComment = async (req, res) => {
   let t;
   try {
     const { id, estado, usuario_modificacion } = req.body;
+    console.log(`id: ${id} estado: ${estado}`);
     t = await sequelize.transaction();
-    Comment.update(
+    await Comment.update(
       {
         estado,
         usuario_modificacion,
