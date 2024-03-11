@@ -35,7 +35,7 @@ db.material = require('./material.model')(sequelize, Sequelize);
 db.country = require('./country.model')(sequelize, Sequelize);
 db.deterioration_option = require('./deterioration_option.model')(sequelize, Sequelize);
 db.state_integrity = require('./state_integrity.model')(sequelize, Sequelize);
-db.tecnique = require('./tecnique.model')(sequelize, Sequelize);
+db.technique = require('./technique.model')(sequelize, Sequelize);
 
 // Asociación usuario-roles
 db.role.belongsToMany(db.user, {
@@ -91,18 +91,18 @@ db.piece.belongsTo(db.state_integrity, {
 
 // Asociación piezas-estados
 db.piece.belongsTo(db.state, {
-  foreignKey: 'estado',
+  foreignKey: 'estado_piezas',
   targetKey: 'id',
 });
 
-// Asociación piezas-estados
-db.piece.belongsTo(db.tecnique, {
+// Asociación piezas-técnicas
+db.piece.belongsTo(db.technique, {
   foreignKey: 'tecnica',
   targetKey: 'id',
   as: 'tecnica_id',
 });
 
-// Asociación piezas-estados
+// Asociación piezas-tipos
 db.piece.belongsTo(db.type, {
   foreignKey: 'tipo',
   targetKey: 'id',
@@ -116,7 +116,7 @@ db.visit.belongsTo(db.user, {
   as: 'usuario_id',
 });
 
-// Asociación piezas-estados
+// Asociación piezas-usuarios
 db.piece.belongsTo(db.user, {
   foreignKey: 'usuario_modificacion',
   targetKey: 'usuario',

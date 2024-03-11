@@ -22,9 +22,6 @@ module.exports = (sequelize, Sequelize) => {
     otro_nombre: {
       type: Sequelize.STRING,
     },
-    material: {
-      type: Sequelize.INTEGER,
-    },
     otros_material: {
       type: Sequelize.STRING,
     },
@@ -67,10 +64,7 @@ module.exports = (sequelize, Sequelize) => {
     regimen: {
       type: Sequelize.INTEGER,
     },
-    estado: {
-      type: Sequelize.INTEGER,
-    },
-    opcion_deterioro: {
+    estado_piezas: {
       type: Sequelize.INTEGER,
     },
     otros_deterioro: {
@@ -89,10 +83,10 @@ module.exports = (sequelize, Sequelize) => {
       type: Sequelize.STRING,
     },
     imagen1: {
-      type: Sequelize.STRING,
+      type: Sequelize.BLOB,
     },
     imagen2: {
-      type: Sequelize.STRING,
+      type: Sequelize.BLOB,
     },
     entidad_investigadora: {
       type: Sequelize.STRING,
@@ -111,6 +105,16 @@ module.exports = (sequelize, Sequelize) => {
     },
     registro_fotográfico: {
       type: Sequelize.STRING,
+    },
+    registra_foto: {
+      type: Sequelize.STRING,
+    },
+    estado: {
+      type: Sequelize.INTEGER,
+      validate: {
+        // Solo se permiten los valores 0, 1 o 2
+        isIn: [0, 1, 2],
+      },
     },
     usuario_modificacion: {
       type: Sequelize.STRING,

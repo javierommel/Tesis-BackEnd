@@ -13,7 +13,7 @@ module.exports = (sequelize, Sequelize) => {
       allowNull: false,
       validate: {
         // Solo se permiten los valores 0, 1 o 2
-        isOneOf: [0, 1, 2],
+        isIn: [0, 1, 2],
       },
     },
   });

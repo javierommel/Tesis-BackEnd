@@ -33,16 +33,19 @@ exports.getUser = (req, res) => {
     User.findAll({
       attributes: ['usuario', 'nombre', 'email', 'password', 'fnacimiento', 'pais', 'estado'],
       limit: pageSize,
-      where: { estado: [0, 1] },
+      where: { estado: [0, 1], usuario: {
+        [Op.ne]: 'admin',
+      },},
       offset,
       include: {
         model: db.role,
         through: 'user_roles',
-        attributes: ['id'], // Selecciona solo el campo 'name' de la tabla 'role'
+        attributes: ['id', 'nombre'], // Selecciona solo el campo 'name' de la tabla 'role'
       },
     }).then((users) => {
       const usersWithRoles = users.map((user) => {
         const roles = user.roles.map((role) => role.id).join(', ');
+        const rolesname = user.roles.map((role) => role.nombre).join(', ');
         return {
           usuario: user.usuario,
           nombre: user.nombre,
@@ -51,11 +54,17 @@ exports.getUser = (req, res) => {
           estado: user.estado,
           pais: user.pais,
           roles,
+          rolesname
         };
       });
       Role.findAll({
         attributes: ['id', 'nombre'],
-        where: { estado: 1 },
+        where: {
+          estado: 1,
+          id: {
+            [Op.ne]: 2,
+          },
+        },
       }).then((role) => {
         res.send({ roles: role, data: usersWithRoles, message: 'Consulta realizada correctamente!' });
       });
