@@ -56,13 +56,13 @@ module.exports = (sequelize, Sequelize) => {
       type: Sequelize.STRING,
     },
     descripcion: {
-      type: Sequelize.STRING,
+      type: Sequelize.TEXT,
     },
     ubicacion: {
       type: Sequelize.STRING,
     },
     regimen: {
-      type: Sequelize.INTEGER,
+      type: Sequelize.STRING,
     },
     estado_piezas: {
       type: Sequelize.INTEGER,
@@ -77,10 +77,10 @@ module.exports = (sequelize, Sequelize) => {
       type: Sequelize.STRING,
     },
     observacion: {
-      type: Sequelize.STRING,
+      type: Sequelize.TEXT,
     },
     publicidad: {
-      type: Sequelize.STRING,
+      type: Sequelize.TEXT,
     },
     imagen1: {
       type: Sequelize.BLOB,
@@ -106,7 +106,7 @@ module.exports = (sequelize, Sequelize) => {
     registro_fotográfico: {
       type: Sequelize.STRING,
     },
-    registra_foto: {
+    realiza_foto: {
       type: Sequelize.STRING,
     },
     estado: {
