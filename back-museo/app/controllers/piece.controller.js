@@ -133,3 +133,114 @@ exports.getInformationPieces = async (req, res) => {
     res.status(500).send({ message: err.message || 'Error al consultar informacion.' });
   }
 };
+exports.deletePiece = async (req, res) => {
+  let t;
+
+  try {
+    const { id, usuario_modificacion } = req.body;
+    t = await sequelize.transaction();
+    // Busca el usuario antes de la actualización
+    const pieceAntes = await Piece.findOne({ where: { id: id }, transaction: t });
+    // Actualiza el usuario
+    const [numFilasAfectadas] = await Piece.update(
+      {
+        usuario_modificacion,
+        estado: 2,
+      },
+      { where: { id: id }, transaction: t },
+    );
+    if (numFilasAfectadas > 0) {
+      // Busca el usuario después de la actualización
+      const pieceDespues = await Piece.findOne({ where: { usuario: id }, returning: true, transaction: t });
+      // Crea el historial del usuario dentro de la transacción
+      await PieceHistory.create({
+        user_id: pieceDespues.usuario,
+        tipo_accion: 'eliminacion',
+        datos_antiguos: pieceAntes,
+        datos_nuevos: pieceDespues.get(),
+        usuario_modificacion,
+      }, { transaction: t });
+      // Confirma la transacción
+      await t.commit();
+      res.send({ message: 'Pieza de arte eliminada correctamente!' });
+    } else {
+      // Si no se actualizó ningún usuario, revierte la transacción
+      await t.rollback();
+      res.status(404).send({ message: 'Pieza de arte no encontrada para eliminación.' });
+    }
+  } catch (err) {
+    if (t) {
+      await t.rollback();
+    }
+    res.status(500).send({ message: err.message || 'Error al eliminar piezas de arte.' });
+  }
+};
+
+exports.updatePiece = async (req, res) => {
+  let t;
+  try {
+    const {
+      id, data, roles, usuario_modificacion,
+    } = req.body;
+    t = await sequelize.transaction();
+    // Busca el usuario antes de la actualización
+    const pieceAntes = await User.findOne({ where: { usuario: id }, transaction: t });
+    // Construye el objeto de datos a actualizar
+    const datosAActualizar = {};
+    datosAActualizar.usuario = data.username;
+    datosAActualizar.nombre = data.name;
+    datosAActualizar.email = data.email;
+    if (data.password !== '') datosAActualizar.password = bcrypt.hashSync(data.password, 8);
+    datosAActualizar.pais = data.country;
+    datosAActualizar.fnacimiento = data.year;
+    datosAActualizar.usuario_modificacion = usuario_modificacion;
+    // Actualiza el usuario
+    const [numFilasAfectadas] = await User.update(
+      datosAActualizar,
+      { where: { usuario: id }, transaction: t },
+    );
+
+    if (numFilasAfectadas > 0) {
+      // Busca el usuario después de la actualización
+      const pieceDespues = await Piece.findOne({ where: { usuario: id }, returning: true, transaction: t });
+      // Elimina roles existentes y establece nuevos roles
+      // Obtiene los roles actuales del usuario
+      const rolesActuales = await pieceDespues.getRoles();
+      // Elimina los roles actuales
+      await pieceDespues.removeRoles(rolesActuales, { transaction: t });
+
+      if (roles) {
+        const rolesEncontrados = await Role.findAll({
+          where: {
+            nombre: {
+              [Op.or]: roles,
+            },
+          },
+          transaction: t,
+        });
+        await pieceDespues.setRoles(rolesEncontrados, { transaction: t });
+      } else {
+        await pieceDespues.setRoles([1], { transaction: t });
+      }
+      // Crea el historial del usuario dentro de la transacción
+      await PieceHistory.create({
+        user_id: pieceDespues.usuario,
+        tipo_accion: 'modificación',
+        datos_antiguos: pieceAntes,
+        datos_nuevos: pieceDespues.get(),
+        usuario_modificacion,
+      }, { transaction: t });
+      await t.commit();
+      res.send({ message: 'Usuario modificado correctamente!' });
+    } else {
+      await t.rollback();
+      res.status(404).send({ message: 'Usuario no encontrado para modificación.' });
+    }
+  } catch (err) {
+    console.error(err.stack);
+    if (t) {
+      await t.rollback();
+    }
+    res.status(500).send({ message: err.message || 'Error al modificar usuarios.' });
+  }
+};

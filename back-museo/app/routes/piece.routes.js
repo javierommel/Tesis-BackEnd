@@ -12,5 +12,7 @@ module.exports = function (app) {
 
   app.post('/api/auth/getpiece', controller.getPiece);
   app.post('/api/auth/getinformationpiece', controller.getInformationPieces);
+  app.post('/api/auth/updatepiece', controller.updatePiece);
+  app.post('/api/auth/deletepiece', controller.deletePiece);
   
 };
