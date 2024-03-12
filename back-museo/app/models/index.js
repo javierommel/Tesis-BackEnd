@@ -26,6 +26,7 @@ db.user = require('./user.model')(sequelize, Sequelize);
 db.userhistory = require('./userhistory.model')(sequelize, Sequelize);
 db.role = require('./role.model')(sequelize, Sequelize);
 db.piece = require('./piece.model')(sequelize, Sequelize);
+db.piecehistory = require('./piecehistory.model')(sequelize, Sequelize);
 db.comment = require('./comment.model')(sequelize, Sequelize);
 db.recomendation = require('./recomendation.model')(sequelize, Sequelize, DataTypes);
 db.state = require('./state.model')(sequelize, Sequelize);
@@ -126,6 +127,11 @@ db.piece.belongsTo(db.user, {
 // Asociación usuario-usuario_historial
 db.user.hasMany(db.userhistory, {
   foreignKey: 'userId',
+});
+
+// Asociación usuario-usuario_historial
+db.piece.hasMany(db.piecehistory, {
+  foreignKey: 'pieceId',
 });
 
 module.exports = db;

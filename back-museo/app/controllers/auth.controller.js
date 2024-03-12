@@ -41,7 +41,7 @@ exports.signup = async (req, res) => {
     // Crea el historial del usuario dentro de la transacción
     await UserHistory.create({
       user_id: user.usuario,
-      tipo_accion: 'creación',
+      tipo_accion: 'creacion',
       datos_antiguos: null,
       datos_nuevos: null,
       usuario_modificacion: req.body.usuario_modificacion,

@@ -53,7 +53,7 @@ module.exports = (sequelize, Sequelize) => {
       type: Sequelize.FLOAT,
     },
     inscripcion: {
-      type: Sequelize.STRING,
+      type: Sequelize.TEXT,
     },
     descripcion: {
       type: Sequelize.TEXT,
