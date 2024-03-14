@@ -45,6 +45,7 @@ exports.signup = async (req, res) => {
       datos_antiguos: null,
       datos_nuevos: null,
       usuario_modificacion: req.body.usuario_modificacion,
+      fecha_modificacion: new Date(),
     }, { transaction: t });
     await t.commit();
     res.send({ message: 'Usuario registrado correctamente!' });

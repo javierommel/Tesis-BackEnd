@@ -33,9 +33,11 @@ exports.getUser = (req, res) => {
     User.findAll({
       attributes: ['usuario', 'nombre', 'email', 'password', 'fnacimiento', 'pais', 'estado'],
       limit: pageSize,
-      where: { estado: [0, 1], usuario: {
-        [Op.ne]: 'admin',
-      },},
+      where: {
+        estado: [0, 1], usuario: {
+          [Op.ne]: 'admin',
+        },
+      },
       offset,
       include: {
         model: db.role,
@@ -174,6 +176,7 @@ exports.updateUser = async (req, res) => {
         datos_antiguos: userAntes,
         datos_nuevos: userDespues.get(),
         usuario_modificacion,
+        fecha_modificacion: new Date(),
       }, { transaction: t });
       await t.commit();
       res.send({ message: 'Usuario modificado correctamente!' });
@@ -224,13 +227,10 @@ exports.getUserId = (req, res) => {
 exports.updateUserProfile = async (req, res) => {
   let t;
   try {
-    console.log(`data: ${JSON.stringify(req.body)}`);
     const { id } = req.body;
     const data = JSON.parse(req.body.data);
     const { roles } = req.body;
     const { usuario_modificacion } = req.body;
-    //    console.log("data: " + JSON.stringify(data))
-    //    console.log("iamge: " + image)
     const { originalname, path, mimetype } = req.file;
     console.log(`imagen: ${originalname} ${path}${mimetype}`);
     // Lee la imagen desde el servidor
@@ -284,6 +284,7 @@ exports.updateUserProfile = async (req, res) => {
         datos_antiguos: userAntes,
         datos_nuevos: userDespues.get(),
         usuario_modificacion,
+        fecha_modificacion: new Date(),
       }, { transaction: t });
       await t.commit();
       res.send({ message: 'Usuario modificado correctamente!' });

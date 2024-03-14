@@ -140,25 +140,26 @@ exports.deletePiece = async (req, res) => {
     const { id, usuario_modificacion } = req.body;
     t = await sequelize.transaction();
     // Busca el usuario antes de la actualización
-    const pieceAntes = await Piece.findOne({ where: { id: id }, transaction: t });
+    const pieceAntes = await Piece.findOne({ where: { numero_ordinal: id }, transaction: t });
     // Actualiza el usuario
     const [numFilasAfectadas] = await Piece.update(
       {
         usuario_modificacion,
         estado: 2,
       },
-      { where: { id: id }, transaction: t },
+      { where: { numero_ordinal: id }, transaction: t },
     );
     if (numFilasAfectadas > 0) {
       // Busca el usuario después de la actualización
       const pieceDespues = await Piece.findOne({ where: { usuario: id }, returning: true, transaction: t });
       // Crea el historial del usuario dentro de la transacción
       await PieceHistory.create({
-        user_id: pieceDespues.usuario,
+        piece_id: pieceDespues.numero_ordinal,
         tipo_accion: 'eliminacion',
         datos_antiguos: pieceAntes,
         datos_nuevos: pieceDespues.get(),
         usuario_modificacion,
+        fecha_modificacion: new Date(),
       }, { transaction: t });
       // Confirma la transacción
       await t.commit();
@@ -179,48 +180,102 @@ exports.deletePiece = async (req, res) => {
 exports.updatePiece = async (req, res) => {
   let t;
   try {
+    const imagen1=req.file['imagen1']   
+    const imagen2=req.file['imagen2']   
+    //const { originalname, path, mimetype } = req.file['imagen1'];
+    //console.log(`imagen: ${originalname} ${path}${mimetype}`);
+    // Lee la imagen desde el servidor
+    const imagen11 = fs.readFileSync(imagen1.path);
+    const imagen12 = fs.readFileSync(imagen2.path);
+    
     const {
-      id, data, roles, usuario_modificacion,
+      id, materiales, deterioros, usuario_modificacion,
     } = req.body;
+    const data = JSON.parse(req.body.data);
     t = await sequelize.transaction();
-    // Busca el usuario antes de la actualización
+    // Busca el pieza antes de la actualización
     const pieceAntes = await User.findOne({ where: { usuario: id }, transaction: t });
     // Construye el objeto de datos a actualizar
     const datosAActualizar = {};
-    datosAActualizar.usuario = data.username;
-    datosAActualizar.nombre = data.name;
-    datosAActualizar.email = data.email;
-    if (data.password !== '') datosAActualizar.password = bcrypt.hashSync(data.password, 8);
-    datosAActualizar.pais = data.country;
-    datosAActualizar.fnacimiento = data.year;
+    datosAActualizar.numero_ordinal = data.numero_ordinal;
+    datosAActualizar.numero_historico = data.numero_historico;
+    datosAActualizar.codigo_inpc = data.codigo_inpc;
+    datosAActualizar.tipo_bien = data.tipo_bien;
+    datosAActualizar.nombre = data.nombre;
+    datosAActualizar.otro_nombre = data.otro_nombre;
+    datosAActualizar.otros_material = data.otros_material;
+    datosAActualizar.tecnica = data.tecnica;
+    datosAActualizar.autor = data.autor;
+    datosAActualizar.siglo = data.siglo;
+    datosAActualizar.anio = data.anio;
+    datosAActualizar.alto = data.alto;
+    datosAActualizar.ancho = data.ancho;
+    datosAActualizar.diametro = data.diametro;
+    datosAActualizar.espesor = data.espesor;
+    datosAActualizar.peso = data.peso;
+    datosAActualizar.inscripcion = data.inscripcion;
+    datosAActualizar.descripcion = data.descripcion;
+    datosAActualizar.ubicacion = data.ubicacion;
+    datosAActualizar.regimen = data.regimen;
+    datosAActualizar.estado_piezas = data.estado_piezas;
+    datosAActualizar.otros_deterioro = data.otros_deterioro;
+    datosAActualizar.estado_integridad = data.estado_integridad;
+    datosAActualizar.conservacion = data.conservacion;
+    datosAActualizar.observacion = data.observacion;
+    datosAActualizar.publicidad = data.publicidad;
+    if (data.imagen1) datosAActualizar.imagen1 = imagen11;
+    if (data.imagen2) datosAActualizar.imagen2 = imagen12;
+    datosAActualizar.imagen2 = data.imagen2;
+    datosAActualizar.entidad_investigadora = data.entidad_investigadora;
+    datosAActualizar.registrado = data.registrado;
+    datosAActualizar.fecha_registro = data.fecha_registro;
+    datosAActualizar.revisado = data.revisado;
+    datosAActualizar.fecha_revision = data.fecha_revision;
+    datosAActualizar.registro_fotográfico = data.registro_fotográfico;
+    datosAActualizar.realiza_foto = data.realiza_foto;
+    datosAActualizar.estado = data.estado;
     datosAActualizar.usuario_modificacion = usuario_modificacion;
-    // Actualiza el usuario
-    const [numFilasAfectadas] = await User.update(
+    // Actualiza el Pieza
+    const [numFilasAfectadas] = await Piece.update(
       datosAActualizar,
-      { where: { usuario: id }, transaction: t },
+      { where: { numero_ordinal: id }, transaction: t },
     );
-
+    fs.unlinkSync(imagen1.path);
+    fs.unlinkSync(imagen2.path);
     if (numFilasAfectadas > 0) {
-      // Busca el usuario después de la actualización
-      const pieceDespues = await Piece.findOne({ where: { usuario: id }, returning: true, transaction: t });
+      // Busca el pieza después de la actualización
+      const pieceDespues = await Piece.findOne({ where: { numero_ordinal: id }, returning: true, transaction: t });
       // Elimina roles existentes y establece nuevos roles
       // Obtiene los roles actuales del usuario
-      const rolesActuales = await pieceDespues.getRoles();
+      const materialesActuales = await pieceDespues.getMateriales();
       // Elimina los roles actuales
-      await pieceDespues.removeRoles(rolesActuales, { transaction: t });
+      await pieceDespues.removeMateriales(materialesActuales, { transaction: t });
 
-      if (roles) {
-        const rolesEncontrados = await Role.findAll({
+      const deteriorosActuales = await pieceDespues.getDeteriorationOptions();
+      // Elimina los roles actuales
+      await pieceDespues.removeDeteriorationOptions(deteriorosActuales, { transaction: t });
+
+      if (materiales) {
+        const materialesEncontrados = await Material.findAll({
           where: {
             nombre: {
-              [Op.or]: roles,
+              [Op.or]: materiales,
             },
           },
           transaction: t,
         });
-        await pieceDespues.setRoles(rolesEncontrados, { transaction: t });
-      } else {
-        await pieceDespues.setRoles([1], { transaction: t });
+        await pieceDespues.setMateriales(materialesEncontrados, { transaction: t });
+      }
+      if (deterioros) {
+        const deteriorosEncontrados = await Material.findAll({
+          where: {
+            nombre: {
+              [Op.or]: deterioros,
+            },
+          },
+          transaction: t,
+        });
+        await pieceDespues.setDeteriorationOptions(deteriorosEncontrados, { transaction: t });
       }
       // Crea el historial del usuario dentro de la transacción
       await PieceHistory.create({
@@ -229,18 +284,19 @@ exports.updatePiece = async (req, res) => {
         datos_antiguos: pieceAntes,
         datos_nuevos: pieceDespues.get(),
         usuario_modificacion,
+        fecha_modificacion: new Date(),
       }, { transaction: t });
       await t.commit();
       res.send({ message: 'Usuario modificado correctamente!' });
     } else {
       await t.rollback();
-      res.status(404).send({ message: 'Usuario no encontrado para modificación.' });
+      res.status(404).send({ message: 'Pieza de arte no encontrado para modificación.' });
     }
   } catch (err) {
     console.error(err.stack);
     if (t) {
       await t.rollback();
     }
-    res.status(500).send({ message: err.message || 'Error al modificar usuarios.' });
+    res.status(500).send({ message: err.message || 'Error al modificar piezas de arte.' });
   }
 };
