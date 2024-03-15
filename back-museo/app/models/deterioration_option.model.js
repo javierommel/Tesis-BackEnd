@@ -1,5 +1,5 @@
 module.exports = (sequelize, Sequelize) => {
-  const Deterioration_option = sequelize.define('opcion_deterioro', {
+  const Deterioration = sequelize.define('opcion_deterioro', {
     id: {
       type: Sequelize.INTEGER,
       primaryKey: true,
@@ -13,10 +13,10 @@ module.exports = (sequelize, Sequelize) => {
       allowNull: false,
       validate: {
         // Solo se permiten los valores 0, 1 o 2
-        isIn: [0, 1, 2],
+        isIn: [[0, 1, 2]],
       },
     },
   });
 
-  return Deterioration_option;
+  return Deterioration;
 };

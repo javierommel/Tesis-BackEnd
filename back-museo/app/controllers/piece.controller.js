@@ -2,7 +2,7 @@ const db = require('../models');
 
 const Piece = db.piece;
 const Type = db.type;
-const Deterioration = db.deterioration_option;
+const Deterioration = db.deterioration;
 const Material = db.material;
 const Stateintegrity = db.state_integrity;
 const State = db.state;
@@ -199,6 +199,8 @@ exports.updatePiece = async (req, res) => {
     const {
       id, materiales, deterioros, usuario_modificacion,
     } = req.body;
+    const materialesArray = JSON.parse(materiales);
+    const deteriorosArray = JSON.parse(deterioros);
     const data = JSON.parse(req.body.data);
     t = await sequelize.transaction();
     // Busca el pieza antes de la actualización
@@ -255,39 +257,42 @@ exports.updatePiece = async (req, res) => {
       const pieceDespues = await  Piece.findOne({ where: { numero_ordinal: id }, returning: true, transaction: t });
       // Elimina roles existentes y establece nuevos roles
       // Obtiene los roles actuales del usuario
+      const deteriorosActuales = await pieceDespues.getOpcion_deterioros();
       const materialesActuales = await pieceDespues.getMateriales();
       // Elimina los roles actuales
       await pieceDespues.removeMateriales(materialesActuales, { transaction: t });
 
-      const deteriorosActuales = await pieceDespues.getDeteriorationOptions();
       // Elimina los roles actuales
-      await pieceDespues.removeDeteriorationOptions(deteriorosActuales, { transaction: t });
+      await pieceDespues.removeOpcion_deterioros(deteriorosActuales, { transaction: t });
 
       if (materiales) {
+        console.log("materiales: "+JSON.stringify(materiales))
         const materialesEncontrados = await Material.findAll({
           where: {
             nombre: {
-              [Op.or]: materiales,
+              [Op.or]: materialesArray,
             },
           },
           transaction: t,
         });
+      
         await pieceDespues.setMateriales(materialesEncontrados, { transaction: t });
       }
+      
       if (deterioros) {
         const deteriorosEncontrados = await Deterioration.findAll({
           where: {
             nombre: {
-              [Op.or]: deterioros,
+              [Op.or]: deteriorosArray,
             },
           },
           transaction: t,
         });
-        await pieceDespues.setDeteriorationoptions(deteriorosEncontrados, { transaction: t });
+        await pieceDespues.setOpcion_deterioros(deteriorosEncontrados, { transaction: t });
       }
       // Crea el historial del usuario dentro de la transacción
       await PieceHistory.create({
-        user_id: pieceDespues.usuario,
+        piece_id: pieceDespues.numero_ordinal,
         tipo_accion: 'modificación',
         datos_antiguos: pieceAntes,
         datos_nuevos: pieceDespues.get(),

@@ -227,13 +227,10 @@ exports.getUserId = (req, res) => {
 exports.updateUserProfile = async (req, res) => {
   let t;
   try {
-    const { id } = req.body;
+    const { id, usuario_modificacion } = req.body;
     const data = JSON.parse(req.body.data);
-    const { roles } = req.body;
-    const { usuario_modificacion } = req.body;
     const { originalname, path, mimetype } = req.file;
-    console.log(`imagen: ${originalname} ${path}${mimetype}`);
-    // Lee la imagen desde el servidor
+
     const image = fs.readFileSync(path);
     t = await sequelize.transaction();
     // Busca el usuario antes de la actualización
@@ -258,25 +255,7 @@ exports.updateUserProfile = async (req, res) => {
     if (numFilasAfectadas > 0) {
       // Busca el usuario después de la actualización
       const userDespues = await User.findOne({ where: { usuario: id }, returning: true, transaction: t });
-      // Elimina roles existentes y establece nuevos roles
-      // Obtiene los roles actuales del usuario
-      const rolesActuales = await userDespues.getRoles();
-      // Elimina los roles actuales
-      await userDespues.removeRoles(rolesActuales, { transaction: t });
-
-      if (roles) {
-        const rolesEncontrados = await Role.findAll({
-          where: {
-            nombre: {
-              [Op.or]: roles,
-            },
-          },
-          transaction: t,
-        });
-        await userDespues.setRoles(rolesEncontrados, { transaction: t });
-      } else {
-        await userDespues.setRoles([1], { transaction: t });
-      }
+     
       // Crea el historial del usuario dentro de la transacción
       await UserHistory.create({
         user_id: userDespues.usuario,

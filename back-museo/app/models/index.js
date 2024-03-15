@@ -34,7 +34,7 @@ db.type = require('./type.model')(sequelize, Sequelize);
 db.visit = require('./visit.model')(sequelize, Sequelize);
 db.material = require('./material.model')(sequelize, Sequelize);
 db.country = require('./country.model')(sequelize, Sequelize);
-db.deterioration_option = require('./deterioration_option.model')(sequelize, Sequelize);
+db.deterioration = require('./deterioration_option.model')(sequelize, Sequelize);
 db.state_integrity = require('./state_integrity.model')(sequelize, Sequelize);
 db.technique = require('./technique.model')(sequelize, Sequelize);
 
@@ -68,11 +68,17 @@ db.user.belongsTo(db.country, {
 });
 
 // Asociación piezas-opciones_deterioros
-db.piece.belongsToMany(db.deterioration_option, {
+db.piece.belongsToMany(db.deterioration, {
   through: 'deterioro_piezas',
   foreignKey: 'pieza',
   otherKey: 'deterioro',
   targetKey: 'id',
+});
+db.deterioration.belongsToMany(db.piece, {
+  through: 'deterioro_piezas',
+  foreignKey: 'deterioro',
+  otherKey: 'pieza',
+  targetKey: 'numero_ordinal',
 });
 
 // Asociación piezas-materiales
@@ -82,7 +88,12 @@ db.piece.belongsToMany(db.material, {
   otherKey: 'material',
   targetKey: 'id',
 });
-
+db.material.belongsToMany(db.piece, {
+  through: 'material_piezas',
+  foreignKey: 'material',
+  otherKey: 'pieza',
+  targetKey: 'numero_ordinal',
+});
 // Asociación piezas-estadointegridad
 db.piece.belongsTo(db.state_integrity, {
   foreignKey: 'estado_integridad',
