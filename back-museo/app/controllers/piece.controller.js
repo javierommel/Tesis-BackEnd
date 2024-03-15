@@ -7,6 +7,10 @@ const Material = db.material;
 const Stateintegrity = db.state_integrity;
 const State = db.state;
 const Technique = db.technique;
+const PieceHistory = db.piecehistory
+const { sequelize } = db;
+const { Op } = db.Sequelize;
+const fs = require('fs');
 
 exports.getPiece = (req, res) => {
   try {
@@ -15,6 +19,12 @@ exports.getPiece = (req, res) => {
     const offset = (page - 1) * pageSize;
     Piece.findAll({
       //attributes: ['numero_ordinal', 'codigo_inpc', 'nombre', 'tipo_bien', 'autor', 'estado'],
+      where: {
+        estado: [0, 1],
+      },
+      order: [
+        ['numero_ordinal', 'ASC'],
+      ],
       limit: pageSize,
       offset,
       include: [{
@@ -139,9 +149,9 @@ exports.deletePiece = async (req, res) => {
   try {
     const { id, usuario_modificacion } = req.body;
     t = await sequelize.transaction();
-    // Busca el usuario antes de la actualización
+    // Busca la pieza antes de la actualización
     const pieceAntes = await Piece.findOne({ where: { numero_ordinal: id }, transaction: t });
-    // Actualiza el usuario
+    // Actualiza la pieza
     const [numFilasAfectadas] = await Piece.update(
       {
         usuario_modificacion,
@@ -151,8 +161,8 @@ exports.deletePiece = async (req, res) => {
     );
     if (numFilasAfectadas > 0) {
       // Busca el usuario después de la actualización
-      const pieceDespues = await Piece.findOne({ where: { usuario: id }, returning: true, transaction: t });
-      // Crea el historial del usuario dentro de la transacción
+      const pieceDespues = await Piece.findOne({ where: { numero_ordinal: id }, returning: true, transaction: t });
+      // Crea el historial de la pieza dentro de la transacción
       await PieceHistory.create({
         piece_id: pieceDespues.numero_ordinal,
         tipo_accion: 'eliminacion',
@@ -165,7 +175,7 @@ exports.deletePiece = async (req, res) => {
       await t.commit();
       res.send({ message: 'Pieza de arte eliminada correctamente!' });
     } else {
-      // Si no se actualizó ningún usuario, revierte la transacción
+      // Si no se actualizó ninguna pieza, revierte la transacción
       await t.rollback();
       res.status(404).send({ message: 'Pieza de arte no encontrada para eliminación.' });
     }
@@ -180,13 +190,11 @@ exports.deletePiece = async (req, res) => {
 exports.updatePiece = async (req, res) => {
   let t;
   try {
-    const imagen1=req.file['imagen1']   
-    const imagen2=req.file['imagen2']   
-    //const { originalname, path, mimetype } = req.file['imagen1'];
-    //console.log(`imagen: ${originalname} ${path}${mimetype}`);
-    // Lee la imagen desde el servidor
-    const imagen11 = fs.readFileSync(imagen1.path);
-    const imagen12 = fs.readFileSync(imagen2.path);
+    const imagen1=req.files['imagen1']?req.files['imagen1'][0]:null;   
+    const imagen2=req.files['imagen2']?req.files['imagen2'][0]:null;
+    
+    const imagen11 = imagen1?fs.readFileSync(imagen1.path):null;
+    const imagen12 = imagen2?fs.readFileSync(imagen2.path):null;
     
     const {
       id, materiales, deterioros, usuario_modificacion,
@@ -194,7 +202,7 @@ exports.updatePiece = async (req, res) => {
     const data = JSON.parse(req.body.data);
     t = await sequelize.transaction();
     // Busca el pieza antes de la actualización
-    const pieceAntes = await User.findOne({ where: { usuario: id }, transaction: t });
+    const pieceAntes = await Piece.findOne({ where: { numero_ordinal: id }, transaction: t });
     // Construye el objeto de datos a actualizar
     const datosAActualizar = {};
     datosAActualizar.numero_ordinal = data.numero_ordinal;
@@ -223,8 +231,8 @@ exports.updatePiece = async (req, res) => {
     datosAActualizar.conservacion = data.conservacion;
     datosAActualizar.observacion = data.observacion;
     datosAActualizar.publicidad = data.publicidad;
-    if (data.imagen1) datosAActualizar.imagen1 = imagen11;
-    if (data.imagen2) datosAActualizar.imagen2 = imagen12;
+    datosAActualizar.imagen1 = imagen11;
+    datosAActualizar.imagen2 = imagen12;
     datosAActualizar.imagen2 = data.imagen2;
     datosAActualizar.entidad_investigadora = data.entidad_investigadora;
     datosAActualizar.registrado = data.registrado;
@@ -233,18 +241,18 @@ exports.updatePiece = async (req, res) => {
     datosAActualizar.fecha_revision = data.fecha_revision;
     datosAActualizar.registro_fotográfico = data.registro_fotográfico;
     datosAActualizar.realiza_foto = data.realiza_foto;
-    datosAActualizar.estado = data.estado;
+    datosAActualizar.estado = data.estado?1:0;
     datosAActualizar.usuario_modificacion = usuario_modificacion;
     // Actualiza el Pieza
     const [numFilasAfectadas] = await Piece.update(
       datosAActualizar,
       { where: { numero_ordinal: id }, transaction: t },
     );
-    fs.unlinkSync(imagen1.path);
-    fs.unlinkSync(imagen2.path);
+    if(imagen1) fs.unlinkSync(imagen1.path);
+    if(imagen2) fs.unlinkSync(imagen2.path);
     if (numFilasAfectadas > 0) {
       // Busca el pieza después de la actualización
-      const pieceDespues = await Piece.findOne({ where: { numero_ordinal: id }, returning: true, transaction: t });
+      const pieceDespues = await  Piece.findOne({ where: { numero_ordinal: id }, returning: true, transaction: t });
       // Elimina roles existentes y establece nuevos roles
       // Obtiene los roles actuales del usuario
       const materialesActuales = await pieceDespues.getMateriales();
@@ -267,7 +275,7 @@ exports.updatePiece = async (req, res) => {
         await pieceDespues.setMateriales(materialesEncontrados, { transaction: t });
       }
       if (deterioros) {
-        const deteriorosEncontrados = await Material.findAll({
+        const deteriorosEncontrados = await Deterioration.findAll({
           where: {
             nombre: {
               [Op.or]: deterioros,
@@ -275,7 +283,7 @@ exports.updatePiece = async (req, res) => {
           },
           transaction: t,
         });
-        await pieceDespues.setDeteriorationOptions(deteriorosEncontrados, { transaction: t });
+        await pieceDespues.setDeteriorationoptions(deteriorosEncontrados, { transaction: t });
       }
       // Crea el historial del usuario dentro de la transacción
       await PieceHistory.create({
