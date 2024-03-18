@@ -27,16 +27,23 @@ exports.getPiece = (req, res) => {
       ],
       limit: pageSize,
       offset,
-      include: [{
-        model: Material,
-        through: 'piece_material',
-        attributes: ['id', 'nombre'], // Selecciona solo el campo 'name' de la tabla 'role'
-      },
-      {
-        model: Deterioration,
-        through: 'piece_deterioration',
-        attributes: ['id', 'nombre'], // Selecciona solo el campo 'name' de la tabla 'role'
-      }],
+      include: [
+        {
+          model: Type,
+          as: 'tipo_id',
+          attributes: ['id', 'nombre'], // Selecciona los atributos necesarios del modelo Type
+        },
+        {
+          model: Material,
+          through: 'piece_material',
+          attributes: ['id', 'nombre'],
+        },
+        {
+          model: Deterioration,
+          through: 'piece_deterioration',
+          attributes: ['id', 'nombre'],
+        },
+      ],
     })
       .then((pieces) => {
         const pieceWithElements = pieces.map((piece) => {
@@ -47,6 +54,7 @@ exports.getPiece = (req, res) => {
             numero_historico: piece.numero_historico,
             codigo_inpc: piece.codigo_inpc,
             tipo_bien: piece.tipo_bien,
+            tipo_biens: piece.tipo_id.nombre,
             nombre: piece.nombre,
             otro_nombre: piece.otro_nombre,
             otros_material: piece.otros_material,
@@ -84,11 +92,7 @@ exports.getPiece = (req, res) => {
             deterioros
           };
         });
-        Type.findAll({
-          attributes: ['id', 'nombre'],
-        }).then((type) => {
-          res.send({ tipo: type, data: pieceWithElements, message: 'Consulta realizada correctamente!' });
-        });
+        res.send({ data: pieceWithElements, message: 'Consulta realizada correctamente!' });
       })
       .catch((err) => {
         res.status(500).send({ message: err.message });
@@ -190,12 +194,12 @@ exports.deletePiece = async (req, res) => {
 exports.updatePiece = async (req, res) => {
   let t;
   try {
-    const imagen1=req.files['imagen1']?req.files['imagen1'][0]:null;   
-    const imagen2=req.files['imagen2']?req.files['imagen2'][0]:null;
-    
-    const imagen11 = imagen1?fs.readFileSync(imagen1.path):null;
-    const imagen12 = imagen2?fs.readFileSync(imagen2.path):null;
-    
+    const imagen1 = req.files['imagen1'] ? req.files['imagen1'][0] : null;
+    const imagen2 = req.files['imagen2'] ? req.files['imagen2'][0] : null;
+
+    const imagen11 = imagen1 ? fs.readFileSync(imagen1.path) : null;
+    const imagen12 = imagen2 ? fs.readFileSync(imagen2.path) : null;
+
     const {
       id, materiales, deterioros, usuario_modificacion,
     } = req.body;
@@ -243,18 +247,18 @@ exports.updatePiece = async (req, res) => {
     datosAActualizar.fecha_revision = data.fecha_revision;
     datosAActualizar.registro_fotográfico = data.registro_fotográfico;
     datosAActualizar.realiza_foto = data.realiza_foto;
-    datosAActualizar.estado = data.estado?1:0;
+    datosAActualizar.estado = data.estado ? 1 : 0;
     datosAActualizar.usuario_modificacion = usuario_modificacion;
     // Actualiza el Pieza
     const [numFilasAfectadas] = await Piece.update(
       datosAActualizar,
       { where: { numero_ordinal: id }, transaction: t },
     );
-    if(imagen1) fs.unlinkSync(imagen1.path);
-    if(imagen2) fs.unlinkSync(imagen2.path);
+    if (imagen1) fs.unlinkSync(imagen1.path);
+    if (imagen2) fs.unlinkSync(imagen2.path);
     if (numFilasAfectadas > 0) {
       // Busca el pieza después de la actualización
-      const pieceDespues = await  Piece.findOne({ where: { numero_ordinal: id }, returning: true, transaction: t });
+      const pieceDespues = await Piece.findOne({ where: { numero_ordinal: id }, returning: true, transaction: t });
       // Elimina roles existentes y establece nuevos roles
       // Obtiene los roles actuales del usuario
       const deteriorosActuales = await pieceDespues.getOpcion_deterioros();
@@ -266,7 +270,7 @@ exports.updatePiece = async (req, res) => {
       await pieceDespues.removeOpcion_deterioros(deteriorosActuales, { transaction: t });
 
       if (materiales) {
-        console.log("materiales: "+JSON.stringify(materiales))
+        console.log("materiales: " + JSON.stringify(materiales))
         const materialesEncontrados = await Material.findAll({
           where: {
             nombre: {
@@ -275,10 +279,10 @@ exports.updatePiece = async (req, res) => {
           },
           transaction: t,
         });
-      
+
         await pieceDespues.setMateriales(materialesEncontrados, { transaction: t });
       }
-      
+
       if (deterioros) {
         const deteriorosEncontrados = await Deterioration.findAll({
           where: {

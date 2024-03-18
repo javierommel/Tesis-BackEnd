@@ -117,7 +117,7 @@ db.piece.belongsTo(db.technique, {
 
 // Asociación piezas-tipos
 db.piece.belongsTo(db.type, {
-  foreignKey: 'tipo',
+  foreignKey: 'tipo_bien',
   targetKey: 'id',
   as: 'tipo_id',
 });

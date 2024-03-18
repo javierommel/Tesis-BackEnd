@@ -15,7 +15,6 @@ module.exports = (sequelize, Sequelize) => {
     },
     imagen1: {
       type: Sequelize.BLOB,
-      allowNull: false,
     },
     imagen2: {
       type: Sequelize.BLOB,

@@ -78,7 +78,7 @@ exports.getComment = (req, res) => {
     const { page, pageSize, usuario } = req.body;
     const offset = (page - 1) * pageSize;
     Comment.findAll({
-      attributes: ['usuario', 'comentario', 'puntuacion', 'fecha_registro', 'estado'],
+      attributes: ['id','usuario', 'comentario', 'puntuacion', 'fecha_registro', 'estado'],
       where: {
         estado: [1],
       },
