@@ -23,6 +23,7 @@ db.Sequelize = Sequelize;
 db.sequelize = sequelize;
 
 db.user = require('./user.model')(sequelize, Sequelize);
+db.general = require('./general.model')(sequelize, Sequelize);
 db.userhistory = require('./userhistory.model')(sequelize, Sequelize);
 db.role = require('./role.model')(sequelize, Sequelize);
 db.piece = require('./piece.model')(sequelize, Sequelize);
@@ -130,6 +131,13 @@ db.visit.belongsTo(db.user, {
 
 // Asociación piezas-usuarios
 db.piece.belongsTo(db.user, {
+  foreignKey: 'usuario_modificacion',
+  targetKey: 'usuario',
+  as: 'usuario',
+});
+
+// Asociación general-usuarios
+db.general.belongsTo(db.user, {
   foreignKey: 'usuario_modificacion',
   targetKey: 'usuario',
   as: 'usuario',

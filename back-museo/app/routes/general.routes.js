@@ -9,5 +9,7 @@ module.exports = function (app) {
     next();
   });
 
-  app.post('/api/general/getcountries', controller.getcountry);
+  app.post('/api/general/getcountries', controller.getCountry);
+  app.post('/api/general/getcontent', controller.getContent);
+  app.post('/api/general/updatecontent', controller.updateContent);
 };
