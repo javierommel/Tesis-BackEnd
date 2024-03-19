@@ -64,7 +64,7 @@ exports.getUser = (req, res) => {
         where: {
           estado: 1,
           id: {
-            [Op.ne]: 2,
+            [Op.ne]: 1,
           },
         },
       }).then((role) => {
@@ -152,11 +152,10 @@ exports.updateUser = async (req, res) => {
       const userDespues = await User.findOne({ where: { usuario: id }, returning: true, transaction: t });
       // Elimina roles existentes y establece nuevos roles
       // Obtiene los roles actuales del usuario
-      const rolesActuales = await userDespues.getRoles();
-      // Elimina los roles actuales
-      await userDespues.removeRoles(rolesActuales, { transaction: t });
-
       if (roles) {
+        const rolesActuales = await userDespues.getRoles();
+        // Elimina los roles actuales
+        await userDespues.removeRoles(rolesActuales, { transaction: t });
         const rolesEncontrados = await Role.findAll({
           where: {
             nombre: {
@@ -166,7 +165,7 @@ exports.updateUser = async (req, res) => {
           transaction: t,
         });
         await userDespues.setRoles(rolesEncontrados, { transaction: t });
-      } 
+      }
       // Crea el historial del usuario dentro de la transacción
       await UserHistory.create({
         user_id: userDespues.usuario,
@@ -227,7 +226,7 @@ exports.updateUserProfile = async (req, res) => {
   try {
     const { id, usuario_modificacion } = req.body;
     const data = JSON.parse(req.body.data);
-    const { originalname, path, mimetype } = req.file;
+    const { path } = req.file;
 
     const image = fs.readFileSync(path);
     t = await sequelize.transaction();
@@ -253,7 +252,7 @@ exports.updateUserProfile = async (req, res) => {
     if (numFilasAfectadas > 0) {
       // Busca el usuario después de la actualización
       const userDespues = await User.findOne({ where: { usuario: id }, returning: true, transaction: t });
-     
+
       // Crea el historial del usuario dentro de la transacción
       await UserHistory.create({
         user_id: userDespues.usuario,
