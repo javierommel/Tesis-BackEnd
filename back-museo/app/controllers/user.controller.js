@@ -166,9 +166,7 @@ exports.updateUser = async (req, res) => {
           transaction: t,
         });
         await userDespues.setRoles(rolesEncontrados, { transaction: t });
-      } else {
-        await userDespues.setRoles([1], { transaction: t });
-      }
+      } 
       // Crea el historial del usuario dentro de la transacción
       await UserHistory.create({
         user_id: userDespues.usuario,

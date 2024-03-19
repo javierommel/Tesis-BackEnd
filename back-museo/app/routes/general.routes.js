@@ -1,3 +1,5 @@
+const path = require('path');
+const multer = require('multer');
 const controller = require('../controllers/general.controller');
 
 module.exports = function (app) {
@@ -8,8 +10,22 @@ module.exports = function (app) {
     );
     next();
   });
+  const storage = multer.diskStorage({
+    destination(req, file, cb) {
+      cb(null, path.join(__dirname, '../upload'));
+    },
+    filename(req, file, cb) {
+      cb(null, `${file.originalname}+${Date.now()}.${file.mimetype.split('/')[1]}`);
+    },
+  });
+  const cargarArchivos = multer({ storage: storage }).fields([
+    { name: 'imagen1' },
+    { name: 'imagen2' },
+    { name: 'imagen3' },
+    { name: 'imagen4' }
+  ]);
 
   app.post('/api/general/getcountries', controller.getCountry);
   app.post('/api/general/getcontent', controller.getContent);
-  app.post('/api/general/updatecontent', controller.updateContent);
+  app.post('/api/general/updatecontent', cargarArchivos, controller.updateContent);
 };
