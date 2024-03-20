@@ -39,6 +39,10 @@ exports.getUser = (req, res) => {
         },
       },
       offset,
+      limit: pageSize,
+      order: [
+        ['usuario', 'ASC'],
+      ],
       include: {
         model: db.role,
         through: 'user_roles',
@@ -67,6 +71,9 @@ exports.getUser = (req, res) => {
             [Op.ne]: 1,
           },
         },
+        order: [
+          ['id', 'ASC'],
+        ],
       }).then((role) => {
         res.send({ roles: role, data: usersWithRoles, message: 'Consulta realizada correctamente!' });
       });
@@ -119,6 +126,7 @@ exports.deleteUser = async (req, res) => {
     if (t) {
       await t.rollback();
     }
+    console.error(err.stack);
     res.status(500).send({ message: err.message || 'Error al eliminar usuarios.' });
   }
 };
@@ -141,6 +149,7 @@ exports.updateUser = async (req, res) => {
     datosAActualizar.pais = data.country;
     datosAActualizar.fnacimiento = data.year;
     datosAActualizar.usuario_modificacion = usuario_modificacion;
+    datosAActualizar.estado = data.estado?1:0;
     // Actualiza el usuario
     const [numFilasAfectadas] = await User.update(
       datosAActualizar,

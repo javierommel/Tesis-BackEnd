@@ -83,6 +83,7 @@ exports.getComment = (req, res) => {
         estado: [1],
       },
       offset,
+      limit: pageSize,
       include: {
         model: User,
         attributes: ['nombre', 'avatar'],
@@ -128,6 +129,7 @@ exports.deleteComment = async (req, res) => {
     if (t) {
       await t.rollback();
     }
+    console.error(err);
     res.status(500).send({ message: err.message || 'Error al eliminar comentario.' });
   }
 };

@@ -36,7 +36,7 @@ exports.signup = async (req, res) => {
       });
       await user.setRoles(roles, { transaction: t });
     } else {
-      await user.setRoles([1], { transaction: t });
+      await user.setRoles([2], { transaction: t });
     }
     // Crea el historial del usuario dentro de la transacción
     await UserHistory.create({

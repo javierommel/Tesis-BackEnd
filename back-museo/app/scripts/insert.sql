@@ -1,8 +1,9 @@
 /*TABLA ROLES*/
-INSERT INTO public.roles(id, nombre, estado, "createdAt", "updatedAt") VALUES (1, 'user', 1, current_timestamp, current_timestamp);
-INSERT INTO public.roles(id, nombre, estado, "createdAt", "updatedAt") VALUES (2, 'admin', 1, current_timestamp, current_timestamp);
+INSERT INTO public.roles(id, nombre, estado, "createdAt", "updatedAt") VALUES (1, 'admin', 1, current_timestamp, current_timestamp);
+INSERT INTO public.roles(id, nombre, estado, "createdAt", "updatedAt") VALUES (2, 'user', 1, current_timestamp, current_timestamp);
 INSERT INTO public.roles(id, nombre, estado, "createdAt", "updatedAt") VALUES (3, 'manager', 1, current_timestamp, current_timestamp);
 INSERT INTO public.roles(id, nombre, estado, "createdAt", "updatedAt") VALUES (4, 'report', 1, current_timestamp, current_timestamp);
+INSERT INTO public.roles(id, nombre, estado, "createdAt", "updatedAt") VALUES (5, 'supervisor', 1, current_timestamp, current_timestamp);
 
 /*TABLA TIPOS*/
 INSERT INTO public.tipos(id, nombre, estado, "createdAt", "updatedAt") VALUES (1, 'Pintura', 1, current_timestamp, current_timestamp);
