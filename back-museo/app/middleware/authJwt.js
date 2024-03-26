@@ -23,6 +23,7 @@ verifyToken = (req, res, next) => {
         });
       }
       req.userId = decoded.id;
+      console.log("asdfasdf: "+req.userId)
       next();
     },
   );
@@ -32,7 +33,7 @@ isAdmin = (req, res, next) => {
   User.findByPk(req.userId).then((user) => {
     user.getRoles().then((roles) => {
       for (let i = 0; i < roles.length; i++) {
-        if (roles[i].name === 'admin') {
+        if (roles[i].nombre === 'admin') {
           next();
           return;
         }
@@ -49,7 +50,7 @@ isModerator = (req, res, next) => {
   User.findByPk(req.userId).then((user) => {
     user.getRoles().then((roles) => {
       for (let i = 0; i < roles.length; i++) {
-        if (roles[i].name === 'moderator') {
+        if (roles[i].nombre === 'manager') {
           next();
           return;
         }
