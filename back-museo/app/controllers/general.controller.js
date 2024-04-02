@@ -22,7 +22,7 @@ exports.getCountry = (req, res) => {
 exports.getContent = (req, res) => {
   try {
     General.findAll({
-      attributes: ['titulo', 'contenido', 'imagen1', 'imagen2', 'imagen3', 'imagen4'],
+      attributes: ['titulo', 'contenido', 'nrocomentarios','imagen1', 'imagen2', 'imagen3', 'imagen4'],
       where: { id: 1 },
     }).then((result) => {
       res.send({ data: result, message: 'Consulta realizada correctamente!' });
@@ -58,6 +58,7 @@ exports.updateContent = async (req, res) => {
     datosAActualizar.id = 1;
     datosAActualizar.titulo = data.titulo;
     datosAActualizar.contenido = data.contenido;
+    datosAActualizar.nrocomentarios = data.nrocomentarios;
     if(imagen1) datosAActualizar.imagen1 = imagen11;
     if(imagen2) datosAActualizar.imagen2 = imagen12;
     if(imagen3) datosAActualizar.imagen3 = imagen13;

@@ -13,6 +13,10 @@ module.exports = (sequelize, Sequelize) => {
       type: Sequelize.TEXT,
       allowNull: false,
     },
+    nrocomentarios: {
+      type: Sequelize.INTEGER,
+      
+    },
     imagen1: {
       type: Sequelize.BLOB,
     },

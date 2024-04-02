@@ -49,6 +49,7 @@ exports.getUser = (req, res) => {
         attributes: ['id', 'nombre'], // Selecciona solo el campo 'name' de la tabla 'role'
       },
     }).then((users) => {
+      const userscounts = users.rows; // Resultados de la página actual
       const usersWithRoles = users.map((user) => {
         const roles = user.roles.map((role) => role.id).join(', ');
         const rolesname = user.roles.map((role) => role.nombre).join(', ');
@@ -75,7 +76,25 @@ exports.getUser = (req, res) => {
           ['id', 'ASC'],
         ],
       }).then((role) => {
-        res.send({ roles: role, data: usersWithRoles, message: 'Consulta realizada correctamente!' });
+        User.count({
+          where: {
+            estado: [0, 1], usuario: {
+              [Op.ne]: 'admin',
+            },
+          },
+        }).then((count) => {
+          
+          const totalPages = Math.ceil(count / pageSize); // Número total de páginas
+
+          console.log('Usuarios de la página actual:', users);
+          console.log('Número total de páginas:', totalPages);
+
+          // Lógica para determinar la página siguiente y anterior
+          const nextPage = page < totalPages ? page + 1 : null;
+          const prevPage = page > 1 ? page - 1 : null;
+          res.send({ currentPage:page, totalPages:totalPages, nextPage:nextPage, prevPage:prevPage, total: count, roles: role, data: usersWithRoles, message: 'Consulta realizada correctamente!' });
+        })
+
       });
     })
       .catch((err) => {
@@ -149,7 +168,7 @@ exports.updateUser = async (req, res) => {
     datosAActualizar.pais = data.country;
     datosAActualizar.fnacimiento = data.year;
     datosAActualizar.usuario_modificacion = usuario_modificacion;
-    datosAActualizar.estado = data.estado?1:0;
+    if(data.estado) datosAActualizar.estado = data.estado ? 1 : 0;
     // Actualiza el usuario
     const [numFilasAfectadas] = await User.update(
       datosAActualizar,

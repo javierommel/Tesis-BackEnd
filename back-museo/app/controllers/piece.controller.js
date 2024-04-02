@@ -92,7 +92,20 @@ exports.getPiece = (req, res) => {
             deterioros
           };
         });
-        res.send({ data: pieceWithElements, message: 'Consulta realizada correctamente!' });
+        Piece.count({
+          where: {
+            estado: [0, 1], 
+          },
+        }).then((count) => {
+          
+          const totalPages = Math.ceil(count / pageSize); // Número total de páginas
+          console.log('Número total de páginas:', totalPages);
+
+          // Lógica para determinar la página siguiente y anterior
+          const nextPage = page < totalPages ? page + 1 : null;
+          const prevPage = page > 1 ? page - 1 : null;
+          res.send({ currentPage:page, totalPages:totalPages, nextPage:nextPage, prevPage:prevPage, total: count, data: pieceWithElements, message: 'Consulta realizada correctamente!' });
+        })
       })
       .catch((err) => {
         res.status(500).send({ message: err.message });
