@@ -15,7 +15,7 @@ module.exports = (sequelize, Sequelize) => {
     },
     nrocomentarios: {
       type: Sequelize.INTEGER,
-      
+      allowNull: false,
     },
     imagen1: {
       type: Sequelize.BLOB,

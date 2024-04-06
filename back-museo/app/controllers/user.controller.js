@@ -168,7 +168,7 @@ exports.updateUser = async (req, res) => {
     datosAActualizar.pais = data.country;
     datosAActualizar.fnacimiento = data.year;
     datosAActualizar.usuario_modificacion = usuario_modificacion;
-    if(data.estado) datosAActualizar.estado = data.estado ? 1 : 0;
+    datosAActualizar.estado = data.estado ? 1 : 0;
     // Actualiza el usuario
     const [numFilasAfectadas] = await User.update(
       datosAActualizar,
