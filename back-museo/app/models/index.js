@@ -53,7 +53,7 @@ db.user.belongsToMany(db.role, {
   otherKey: 'rol',
   targetKey: 'id',
 });
-db.ROLES = ['user', 'admin', 'manager', 'report'];
+db.ROLES = ['usuario', 'admin', 'director', 'curador', 'asistente'];
 
 // Asociación comentarios-usuarios
 db.comment.belongsTo(db.user, {

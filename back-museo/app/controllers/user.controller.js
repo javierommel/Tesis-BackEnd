@@ -83,7 +83,7 @@ exports.getUser = (req, res) => {
             },
           },
         }).then((count) => {
-          
+
           const totalPages = Math.ceil(count / pageSize); // Número total de páginas
 
           console.log('Usuarios de la página actual:', users);
@@ -92,7 +92,7 @@ exports.getUser = (req, res) => {
           // Lógica para determinar la página siguiente y anterior
           const nextPage = page < totalPages ? page + 1 : null;
           const prevPage = page > 1 ? page - 1 : null;
-          res.send({ currentPage:page, totalPages:totalPages, nextPage:nextPage, prevPage:prevPage, total: count, roles: role, data: usersWithRoles, message: 'Consulta realizada correctamente!' });
+          res.send({ currentPage: page, totalPages: totalPages, nextPage: nextPage, prevPage: prevPage, total: count, roles: role, data: usersWithRoles, message: 'Consulta realizada correctamente!' });
         })
 
       });
@@ -302,5 +302,70 @@ exports.updateUserProfile = async (req, res) => {
       await t.rollback();
     }
     res.status(500).send({ message: err.message || 'Error al modificar usuarios.' });
+  }
+};
+exports.addUserGoogle = async (req, res) => {
+  let t;
+  try {
+    
+    const userl = await User.findOne({
+      where: {
+        email: req.body.email,
+      },
+    });
+    
+    if (userl === null) {
+      t = await sequelize.transaction();
+      let image = null;
+      const usuario_modificacion = "admin"
+      if (req.file) {
+        const { path } = req.file;
+        image = fs.readFileSync(path);
+        fs.unlinkSync(path);
+      }
+      // Crea el usuario
+      const user = await User.create({
+        usuario: req.body.user,
+        nombre: req.body.name,
+        email: req.body.email,
+        pais: 66,
+        fnacimiento: 2024,
+        password: "",
+        estado: 1,
+        avatar: image,
+        usuario_modificacion,
+      }, { transaction: t });
+
+      // Asigna roles al usuario
+      if (req.body.roles) {
+        const roles = await Role.findAll({
+          where: {
+            nombre: {
+              [Op.or]: req.body.roles,
+            },
+          },
+        });
+        await user.setRoles(roles, { transaction: t });
+      } else {
+        await user.setRoles([2], { transaction: t });
+      }
+      // Crea el historial del usuario dentro de la transacción
+      await UserHistory.create({
+        user_id: user.usuario,
+        tipo_accion: 'creacion',
+        datos_antiguos: null,
+        datos_nuevos: null,
+        usuario_modificacion: usuario_modificacion,
+        fecha_modificacion: new Date(),
+      }, { transaction: t });
+      await t.commit();
+    }
+    res.send({ message: 'Usuario logueado correctamente con google...' });
+  } catch (err) {
+    console.log("error: " + err.message + " " + err.stack)
+    if (t) {
+      await t.rollback();
+    }
+    res.status(500).send({ message: err.message || 'Error al registrar el usuario.' });
   }
 };

@@ -1,7 +1,7 @@
 const db = require('../models');
 
 const Comment = db.comment;
-// const Role = db.role;
+const General = db.general;
 const User = db.user;
 const { sequelize } = db;
 // const Op = db.Sequelize.Op;
@@ -40,10 +40,10 @@ exports.getCommentList = (req, res) => {
       const data = comments.length > 0 ? comments : null;
       Comment.count({
         where: {
-          estado: [0, 1], 
+          estado: [0, 1],
         },
       }).then((count) => {
-        
+
         const totalPages = Math.ceil(count / pageSize); // Número total de páginas
 
         console.log('Número total de páginas:', totalPages);
@@ -51,7 +51,7 @@ exports.getCommentList = (req, res) => {
         // Lógica para determinar la página siguiente y anterior
         const nextPage = page < totalPages ? page + 1 : null;
         const prevPage = page > 1 ? page - 1 : null;
-        res.send({ currentPage:page, totalPages:totalPages, nextPage:nextPage, prevPage:prevPage, total: count, data, message: 'Consulta realizada correctamente!' });
+        res.send({ currentPage: page, totalPages: totalPages, nextPage: nextPage, prevPage: prevPage, total: count, data, message: 'Consulta realizada correctamente!' });
       })
     })
       .catch((err) => {
@@ -89,36 +89,42 @@ exports.addComment = async (req, res) => {
 };
 exports.getComment = (req, res) => {
   try {
-    const { page, pageSize, usuario } = req.body;
-    const offset = (page - 1) * pageSize;
-    Comment.findAll({
-      attributes: ['id','usuario', 'comentario', 'puntuacion', 'fecha_registro', 'estado'],
-      where: {
-        estado: [1],
-      },
-      offset,
-      limit: pageSize,
-      include: {
-        model: User,
-        attributes: ['nombre', 'avatar'],
-        as: 'usuario_id',
-      },
-      order: [
-        ['fecha_registro', 'DESC'],
-      ],
-    }).then((comments) => {
-      const data = comments.length > 0 ? comments : null;
-      User.findAll({
-        attributes: ['avatar'],
-        where: { usuario },
-      }).then((user) => {
-        const avatar = user.length > 0 ? user[0].avatar : null;
-        res.send({ data, avatar, message: 'Consulta realizada correctamente!' });
-      });
-    })
-      .catch((err) => {
-        res.status(500).send({ message: err.message });
-      });
+    const { usuario } = req.body;
+    General.findAll({
+      attributes: ['nrocomentarios'],
+      where: { id: 1 },
+    }).then((result) => {
+      Comment.findAll({
+        attributes: ['id', 'usuario', 'comentario', 'puntuacion', 'fecha_registro', 'estado'],
+        where: {
+          estado: [1],
+        },
+        limit: result[0].nrocomentarios,
+        include: {
+          model: User,
+          attributes: ['nombre', 'avatar'],
+          as: 'usuario_id',
+        },
+        order: [
+          ['fecha_registro', 'DESC'],
+        ],
+      }).then((comments) => {
+        const data = comments.length > 0 ? comments : null;
+        User.findAll({
+          attributes: ['avatar'],
+          where: { usuario },
+        }).then((user) => {
+          const avatar = user.length > 0 ? user[0].avatar : null;
+          res.send({ data, avatar, message: 'Consulta realizada correctamente!' });
+        });
+      })
+        .catch((err) => {
+          res.status(500).send({ message: err.message });
+        });
+    }).catch((err) => {
+      res.status(500).send({ message: err.message });
+    });
+
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Error al recuperar usuarios.' });

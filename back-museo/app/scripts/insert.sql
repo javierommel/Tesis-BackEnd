@@ -1,9 +1,9 @@
 /*TABLA ROLES*/
 INSERT INTO public.roles(id, nombre, estado, "createdAt", "updatedAt") VALUES (1, 'admin', 1, current_timestamp, current_timestamp);
-INSERT INTO public.roles(id, nombre, estado, "createdAt", "updatedAt") VALUES (2, 'user', 1, current_timestamp, current_timestamp);
-INSERT INTO public.roles(id, nombre, estado, "createdAt", "updatedAt") VALUES (3, 'manager', 1, current_timestamp, current_timestamp);
-INSERT INTO public.roles(id, nombre, estado, "createdAt", "updatedAt") VALUES (4, 'report', 1, current_timestamp, current_timestamp);
-INSERT INTO public.roles(id, nombre, estado, "createdAt", "updatedAt") VALUES (5, 'supervisor', 1, current_timestamp, current_timestamp);
+INSERT INTO public.roles(id, nombre, estado, "createdAt", "updatedAt") VALUES (2, 'usuario', 1, current_timestamp, current_timestamp);
+INSERT INTO public.roles(id, nombre, estado, "createdAt", "updatedAt") VALUES (3, 'director', 1, current_timestamp, current_timestamp);
+INSERT INTO public.roles(id, nombre, estado, "createdAt", "updatedAt") VALUES (4, 'asistente', 1, current_timestamp, current_timestamp);
+INSERT INTO public.roles(id, nombre, estado, "createdAt", "updatedAt") VALUES (5, 'curador', 1, current_timestamp, current_timestamp);
 
 /*TABLA TIPOS*/
 INSERT INTO public.tipos(id, nombre, estado, "createdAt", "updatedAt") VALUES (1, 'Pintura', 1, current_timestamp, current_timestamp);
@@ -19,7 +19,6 @@ INSERT INTO public.tipos(id, nombre, estado, "createdAt", "updatedAt") VALUES (1
 INSERT INTO public.tipos(id, nombre, estado, "createdAt", "updatedAt") VALUES (11, 'Equipamiento industrial', 1, current_timestamp, current_timestamp);
 INSERT INTO public.tipos(id, nombre, estado, "createdAt", "updatedAt") VALUES (12, 'Textil', 1, current_timestamp, current_timestamp);
 INSERT INTO public.tipos(id, nombre, estado, "createdAt", "updatedAt") VALUES (13, 'Orfebrería', 1, current_timestamp, current_timestamp);
-INSERT INTO public.tipos(id, nombre, estado, "createdAt", "updatedAt") VALUES (14, 'Otros', 1, current_timestamp, current_timestamp);
 
 /*TABLA MATERIALES*/
 INSERT INTO public.materiales(id, nombre, estado, "createdAt", "updatedAt")VALUES (1, 'Metal', 1, current_timestamp, current_timestamp);
@@ -32,7 +31,6 @@ INSERT INTO public.materiales(id, nombre, estado, "createdAt", "updatedAt")VALUE
 INSERT INTO public.materiales(id, nombre, estado, "createdAt", "updatedAt")VALUES (8, 'Vidrio', 1, current_timestamp, current_timestamp);
 INSERT INTO public.materiales(id, nombre, estado, "createdAt", "updatedAt")VALUES (9, 'Marfil', 1, current_timestamp, current_timestamp);
 INSERT INTO public.materiales(id, nombre, estado, "createdAt", "updatedAt")VALUES (10, 'Cuero', 1, current_timestamp, current_timestamp);
-INSERT INTO public.materiales(id, nombre, estado, "createdAt", "updatedAt")VALUES (11, 'Otros', 1, current_timestamp, current_timestamp);
 
 /*TABLA TECNICAS*/
 INSERT INTO public.tecnicas (id, nombre, estado, "createdAt", "updatedAt") VALUES (1, 'Óleo sobre lienzo', 1, current_timestamp, current_timestamp);

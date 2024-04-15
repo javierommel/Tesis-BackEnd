@@ -1,6 +1,6 @@
 const db = require('../models');
 const config = require('../config/auth.config');
-
+const mail = require('./mail.controller')
 const User = db.user;
 const UserHistory = db.userhistory;
 const Role = db.role;
@@ -22,7 +22,7 @@ exports.signup = async (req, res) => {
       password: bcrypt.hashSync(req.body.password, 8),
       fnacimiento: req.body.nacimiento,
       pais: req.body.pais,
-      estado: 1,
+      estado: req.body.estado ? req.body.estado : 3,
       usuario_modificacion: req.body.usuario_modificacion,
     }, { transaction: t });
     // Asigna roles al usuario
@@ -47,8 +47,11 @@ exports.signup = async (req, res) => {
       usuario_modificacion: req.body.usuario_modificacion,
       fecha_modificacion: new Date(),
     }, { transaction: t });
-    await t.commit();
-    res.send({ message: 'Usuario registrado correctamente!' });
+    const token = exports.createConfirmationToken(req.body.user)
+    mail.sendMail(req.body.email, token)
+    await t.commit(req.body.email);
+
+    res.send({ message: 'Usuario registrado correctamente, Por favor revise su correo y confirme su cuenta!' });
   } catch (err) {
     if (t) {
       await t.rollback();
@@ -75,7 +78,7 @@ exports.signin = (req, res) => {
         return res.status(404).send({ message: 'Usuario no encontrado.' });
       }
 
-      const passwordIsValid = bcrypt.compareSync(
+      const passwordIsValid = req.body.google?true:bcrypt.compareSync(
         req.body.password,
         user.password,
       );
@@ -118,3 +121,42 @@ exports.signin = (req, res) => {
       res.status(500).send({ message: err.message });
     });
 };
+
+exports.createConfirmationToken = (userId) => {
+  const token = jwt.sign(
+    { userId },
+    config.secret,
+    {
+      algorithm: 'HS256',
+      allowInsecureKeySizes: true,
+      expiresIn: 86400, // 24 hours
+    },
+  );
+
+  return token;
+}
+
+// Validar el JWT de confirmación
+exports.verifyConfirmationToken = (req, res) => {
+
+  try {
+    const decoded = jwt.verify(req.body.token, config.secret);
+    if (decoded) {
+      User.update(
+        {
+          usuario_modificacion: "admin",
+          estado: 1,
+        },
+        { where: { usuario: decoded.userId, estado: 3 } }).then((user) => {
+          res.status(200).send({
+            message: "Se ha comprobado su cuenta. Por favor inicie sesión"
+          });
+        }).catch((e) => {
+          res.status(500).send({ message: 'Error al verificar el token de confirmación' });
+        })
+    }
+  } catch (error) {
+    console.error('Error al verificar el token de confirmación:', error.stack);
+    res.status(500).send({ message: 'Error al verificar el token de confirmación' });
+  }
+}

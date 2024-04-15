@@ -51,4 +51,6 @@ module.exports = function (app) {
   app.post('/api/auth/updateuser', controller.updateUser);
 
   app.post('/api/auth/updateuserprofile', upload.single('avatar'), controller.updateUserProfile);
+
+  app.post('/api/auth/addusergoogle', upload.single('avatar'), controller.addUserGoogle);
 };
