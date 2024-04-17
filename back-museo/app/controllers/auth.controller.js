@@ -1,14 +1,14 @@
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
 const db = require('../models');
 const config = require('../config/auth.config');
-const mail = require('./mail.controller')
+const mail = require('./mail.controller');
+
 const User = db.user;
 const UserHistory = db.userhistory;
 const Role = db.role;
 const { Op } = db.Sequelize;
 const { sequelize } = db;
-
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcryptjs');
 
 exports.signup = async (req, res) => {
   let t;
@@ -47,8 +47,8 @@ exports.signup = async (req, res) => {
       usuario_modificacion: req.body.usuario_modificacion,
       fecha_modificacion: new Date(),
     }, { transaction: t });
-    const token = exports.createConfirmationToken(req.body.user)
-    mail.sendMail(req.body.email, token)
+    const token = exports.createConfirmationToken(req.body.user);
+    mail.sendMail(req.body.email, token);
     await t.commit(req.body.email);
 
     res.send({ message: 'Usuario registrado correctamente, Por favor revise su correo y confirme su cuenta!' });
@@ -78,7 +78,7 @@ exports.signin = (req, res) => {
         return res.status(404).send({ message: 'Usuario no encontrado.' });
       }
 
-      const passwordIsValid = req.body.google?true:bcrypt.compareSync(
+      const passwordIsValid = req.body.google ? true : bcrypt.compareSync(
         req.body.password,
         user.password,
       );
@@ -101,21 +101,22 @@ exports.signin = (req, res) => {
       );
 
       const authorities = [];
-      const roles_usuario = [];
+      const rolesUsuario = [];
       user.getRoles().then((roles) => {
         for (let i = 0; i < roles.length; i++) {
           authorities.push(`ROLE_${roles[i].nombre.toUpperCase()}`);
-          roles_usuario.push(roles[i].id);
+          rolesUsuario.push(roles[i].id);
         }
         res.status(200).send({
           id: user.usuario,
           name: user.nombre,
           email: user.email,
           roles: authorities,
-          roles_usuario,
+          rolesUsuario,
           accessToken: token,
         });
       });
+      return true;
     })
     .catch((err) => {
       res.status(500).send({ message: err.message });
@@ -134,29 +135,30 @@ exports.createConfirmationToken = (userId) => {
   );
 
   return token;
-}
+};
 
 // Validar el JWT de confirmación
 exports.verifyConfirmationToken = (req, res) => {
-
   try {
     const decoded = jwt.verify(req.body.token, config.secret);
     if (decoded) {
       User.update(
         {
-          usuario_modificacion: "admin",
+          usuario_modificacion: 'admin',
           estado: 1,
         },
-        { where: { usuario: decoded.userId, estado: 3 } }).then((user) => {
-          res.status(200).send({
-            message: "Se ha comprobado su cuenta. Por favor inicie sesión"
-          });
-        }).catch((e) => {
-          res.status(500).send({ message: 'Error al verificar el token de confirmación' });
-        })
+        { where: { usuario: decoded.userId, estado: 3 } },
+      ).then(() => {
+        res.status(200).send({
+          message: 'Se ha comprobado su cuenta. Por favor inicie sesión',
+        });
+      }).catch((e) => {
+        res.status(500).send({ message: 'Error al verificar el token de confirmación' });
+        console.error(e.message);
+      });
     }
   } catch (error) {
     console.error('Error al verificar el token de confirmación:', error.stack);
     res.status(500).send({ message: 'Error al verificar el token de confirmación' });
   }
-}
+};

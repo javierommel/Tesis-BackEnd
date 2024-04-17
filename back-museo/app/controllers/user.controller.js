@@ -1,3 +1,5 @@
+const fs = require('fs');
+const bcrypt = require('bcryptjs');
 const db = require('../models');
 
 const User = db.user;
@@ -5,8 +7,6 @@ const Role = db.role;
 const UserHistory = db.userhistory;
 const { sequelize } = db;
 const { Op } = db.Sequelize;
-const fs = require('fs');
-const bcrypt = require('bcryptjs');
 
 exports.allAccess = (req, res) => {
   res.status(200).send('Public Content.');
@@ -34,12 +34,12 @@ exports.getUser = (req, res) => {
       attributes: ['usuario', 'nombre', 'email', 'password', 'fnacimiento', 'pais', 'estado'],
       limit: pageSize,
       where: {
-        estado: [0, 1], usuario: {
+        estado: [0, 1],
+        usuario: {
           [Op.ne]: 'admin',
         },
       },
       offset,
-      limit: pageSize,
       order: [
         ['usuario', 'ASC'],
       ],
@@ -49,7 +49,6 @@ exports.getUser = (req, res) => {
         attributes: ['id', 'nombre'], // Selecciona solo el campo 'name' de la tabla 'role'
       },
     }).then((users) => {
-      const userscounts = users.rows; // Resultados de la página actual
       const usersWithRoles = users.map((user) => {
         const roles = user.roles.map((role) => role.id).join(', ');
         const rolesname = user.roles.map((role) => role.nombre).join(', ');
@@ -61,7 +60,7 @@ exports.getUser = (req, res) => {
           estado: user.estado,
           pais: user.pais,
           roles,
-          rolesname
+          rolesname,
         };
       });
       Role.findAll({
@@ -78,12 +77,12 @@ exports.getUser = (req, res) => {
       }).then((role) => {
         User.count({
           where: {
-            estado: [0, 1], usuario: {
+            estado: [0, 1],
+            usuario: {
               [Op.ne]: 'admin',
             },
           },
         }).then((count) => {
-
           const totalPages = Math.ceil(count / pageSize); // Número total de páginas
 
           console.log('Usuarios de la página actual:', users);
@@ -92,9 +91,10 @@ exports.getUser = (req, res) => {
           // Lógica para determinar la página siguiente y anterior
           const nextPage = page < totalPages ? page + 1 : null;
           const prevPage = page > 1 ? page - 1 : null;
-          res.send({ currentPage: page, totalPages: totalPages, nextPage: nextPage, prevPage: prevPage, total: count, roles: role, data: usersWithRoles, message: 'Consulta realizada correctamente!' });
-        })
-
+          res.send({
+            currentPage: page, totalPages, nextPage, prevPage, total: count, roles: role, data: usersWithRoles, message: 'Consulta realizada correctamente!',
+          });
+        });
       });
     })
       .catch((err) => {
@@ -124,7 +124,11 @@ exports.deleteUser = async (req, res) => {
     );
     if (numFilasAfectadas > 0) {
       // Busca el usuario después de la actualización
-      const userDespues = await User.findOne({ where: { usuario: id }, returning: true, transaction: t });
+      const userDespues = await User.findOne({
+        where: { usuario: id },
+        returning: true,
+        transaction: t,
+      });
       // Crea el historial del usuario dentro de la transacción
       await UserHistory.create({
         user_id: userDespues.usuario,
@@ -177,7 +181,11 @@ exports.updateUser = async (req, res) => {
 
     if (numFilasAfectadas > 0) {
       // Busca el usuario después de la actualización
-      const userDespues = await User.findOne({ where: { usuario: id }, returning: true, transaction: t });
+      const userDespues = await User.findOne({
+        where: { usuario: id },
+        returning: true,
+        transaction: t,
+      });
       // Elimina roles existentes y establece nuevos roles
       // Obtiene los roles actuales del usuario
       if (roles) {
@@ -279,7 +287,11 @@ exports.updateUserProfile = async (req, res) => {
 
     if (numFilasAfectadas > 0) {
       // Busca el usuario después de la actualización
-      const userDespues = await User.findOne({ where: { usuario: id }, returning: true, transaction: t });
+      const userDespues = await User.findOne({
+        where: { usuario: id },
+        returning: true,
+        transaction: t,
+      });
 
       // Crea el historial del usuario dentro de la transacción
       await UserHistory.create({
@@ -307,17 +319,16 @@ exports.updateUserProfile = async (req, res) => {
 exports.addUserGoogle = async (req, res) => {
   let t;
   try {
-    
     const userl = await User.findOne({
       where: {
         email: req.body.email,
       },
     });
-    
+
     if (userl === null) {
       t = await sequelize.transaction();
       let image = null;
-      const usuario_modificacion = "admin"
+      const usuario_modificacion = 'admin';
       if (req.file) {
         const { path } = req.file;
         image = fs.readFileSync(path);
@@ -330,7 +341,7 @@ exports.addUserGoogle = async (req, res) => {
         email: req.body.email,
         pais: 66,
         fnacimiento: 2024,
-        password: "",
+        password: '',
         estado: 1,
         avatar: image,
         usuario_modificacion,
@@ -355,14 +366,14 @@ exports.addUserGoogle = async (req, res) => {
         tipo_accion: 'creacion',
         datos_antiguos: null,
         datos_nuevos: null,
-        usuario_modificacion: usuario_modificacion,
+        usuario_modificacion,
         fecha_modificacion: new Date(),
       }, { transaction: t });
       await t.commit();
     }
     res.send({ message: 'Usuario logueado correctamente con google...' });
   } catch (err) {
-    console.log("error: " + err.message + " " + err.stack)
+    console.log(`error: ${err.message} ${err.stack}`);
     if (t) {
       await t.rollback();
     }

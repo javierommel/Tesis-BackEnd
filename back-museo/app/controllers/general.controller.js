@@ -1,8 +1,9 @@
-const db = require('../models');
 const fs = require('fs');
+const db = require('../models');
+
 const { sequelize } = db;
 const Country = db.country;
-const General = db.general
+const General = db.general;
 exports.getCountry = (req, res) => {
   try {
     Country.findAll({
@@ -22,7 +23,7 @@ exports.getCountry = (req, res) => {
 exports.getContent = (req, res) => {
   try {
     General.findAll({
-      attributes: ['titulo', 'contenido', 'nrocomentarios','imagen1', 'imagen2', 'imagen3', 'imagen4'],
+      attributes: ['titulo', 'contenido', 'nrocomentarios', 'imagen1', 'imagen2', 'imagen3', 'imagen4'],
       where: { id: 1 },
     }).then((result) => {
       res.send({ data: result, message: 'Consulta realizada correctamente!' });
@@ -38,10 +39,10 @@ exports.getContent = (req, res) => {
 exports.updateContent = async (req, res) => {
   let t;
   try {
-    const imagen1 = req.files['imagen1'] ? req.files['imagen1'][0] : null;
-    const imagen2 = req.files['imagen2'] ? req.files['imagen2'][0] : null;
-    const imagen3 = req.files['imagen3'] ? req.files['imagen3'][0] : null;
-    const imagen4 = req.files['imagen4'] ? req.files['imagen4'][0] : null;
+    const imagen1 = req.files.imagen1 ? req.files.imagen1[0] : null;
+    const imagen2 = req.files.imagen2 ? req.files.imagen2[0] : null;
+    const imagen3 = req.files.imagen3 ? req.files.imagen3[0] : null;
+    const imagen4 = req.files.imagen4 ? req.files.imagen4[0] : null;
 
     const imagen11 = imagen1 ? fs.readFileSync(imagen1.path) : null;
     const imagen12 = imagen2 ? fs.readFileSync(imagen2.path) : null;
@@ -59,10 +60,10 @@ exports.updateContent = async (req, res) => {
     datosAActualizar.titulo = data.titulo;
     datosAActualizar.contenido = data.contenido;
     datosAActualizar.nrocomentarios = data.nrocomentarios;
-    if(imagen1) datosAActualizar.imagen1 = imagen11;
-    if(imagen2) datosAActualizar.imagen2 = imagen12;
-    if(imagen3) datosAActualizar.imagen3 = imagen13;
-    if(imagen4) datosAActualizar.imagen4 = imagen14;
+    if (imagen1) datosAActualizar.imagen1 = imagen11;
+    if (imagen2) datosAActualizar.imagen2 = imagen12;
+    if (imagen3) datosAActualizar.imagen3 = imagen13;
+    if (imagen4) datosAActualizar.imagen4 = imagen14;
     datosAActualizar.usuario_modificacion = usuario_modificacion;
     // Actualiza el Pieza
     const [numFilasAfectadas] = await General.update(

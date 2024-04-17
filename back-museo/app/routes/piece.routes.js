@@ -10,7 +10,7 @@ module.exports = function (app) {
     );
     next();
   });
-  
+
   const storage = multer.diskStorage({
     destination(req, file, cb) {
       cb(null, path.join(__dirname, '../upload'));
@@ -19,14 +19,13 @@ module.exports = function (app) {
       cb(null, `${file.originalname}+${Date.now()}.${file.mimetype.split('/')[1]}`);
     },
   });
-  const cargarArchivos = multer({ storage: storage }).fields([
+  const cargarArchivos = multer({ storage }).fields([
     { name: 'imagen1' },
-    { name: 'imagen2' }
+    { name: 'imagen2' },
   ]);
 
   app.post('/api/auth/getpiece', controller.getPiece);
   app.post('/api/auth/getinformationpiece', controller.getInformationPieces);
   app.post('/api/auth/updatepiece', cargarArchivos, controller.updatePiece);
   app.post('/api/auth/deletepiece', controller.deletePiece);
-  
 };

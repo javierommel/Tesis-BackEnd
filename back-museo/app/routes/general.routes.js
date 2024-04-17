@@ -18,11 +18,11 @@ module.exports = function (app) {
       cb(null, `${file.originalname}+${Date.now()}.${file.mimetype.split('/')[1]}`);
     },
   });
-  const cargarArchivos = multer({ storage: storage }).fields([
+  const cargarArchivos = multer({ storage }).fields([
     { name: 'imagen1' },
     { name: 'imagen2' },
     { name: 'imagen3' },
-    { name: 'imagen4' }
+    { name: 'imagen4' },
   ]);
 
   app.post('/api/general/getcountries', controller.getCountry);

@@ -1,3 +1,4 @@
+const fs = require('fs');
 const db = require('../models');
 
 const Piece = db.piece;
@@ -7,10 +8,9 @@ const Material = db.material;
 const Stateintegrity = db.state_integrity;
 const State = db.state;
 const Technique = db.technique;
-const PieceHistory = db.piecehistory
+const PieceHistory = db.piecehistory;
 const { sequelize } = db;
 const { Op } = db.Sequelize;
-const fs = require('fs');
 
 exports.getPiece = (req, res) => {
   try {
@@ -18,7 +18,7 @@ exports.getPiece = (req, res) => {
 
     const offset = (page - 1) * pageSize;
     Piece.findAll({
-      //attributes: ['numero_ordinal', 'codigo_inpc', 'nombre', 'tipo_bien', 'autor', 'estado'],
+      // attributes: ['numero_ordinal', 'codigo_inpc', 'nombre', 'tipo_bien', 'autor', 'estado'],
       where: {
         estado: [0, 1],
       },
@@ -89,23 +89,24 @@ exports.getPiece = (req, res) => {
             estado: piece.estado,
             usuario_modificacion: piece.usuario_modificacion,
             materiales,
-            deterioros
+            deterioros,
           };
         });
         Piece.count({
           where: {
-            estado: [0, 1], 
+            estado: [0, 1],
           },
         }).then((count) => {
-          
           const totalPages = Math.ceil(count / pageSize); // Número total de páginas
           console.log('Número total de páginas:', totalPages);
 
           // Lógica para determinar la página siguiente y anterior
           const nextPage = page < totalPages ? page + 1 : null;
           const prevPage = page > 1 ? page - 1 : null;
-          res.send({ currentPage:page, totalPages:totalPages, nextPage:nextPage, prevPage:prevPage, total: count, data: pieceWithElements, message: 'Consulta realizada correctamente!' });
-        })
+          res.send({
+            currentPage: page, totalPages, nextPage, prevPage, total: count, data: pieceWithElements, message: 'Consulta realizada correctamente!',
+          });
+        });
       })
       .catch((err) => {
         res.status(500).send({ message: err.message });
@@ -123,38 +124,43 @@ exports.getInformationPieces = async (req, res) => {
       where: {
         estado: [1],
       },
-    })
+    });
     const deterioration = await Deterioration.findAll({
       attributes: ['id', 'nombre'],
       where: {
         estado: [1],
       },
-    })
+    });
     const material = await Material.findAll({
       attributes: ['id', 'nombre'],
       where: {
         estado: [1],
       },
-    })
+    });
     const integrity = await Stateintegrity.findAll({
       attributes: ['id', 'nombre'],
       where: {
         estado: [1],
       },
-    })
+    });
     const state = await State.findAll({
       attributes: ['id', 'nombre'],
       where: {
         estado: [1],
       },
-    })
+    });
     const technique = await Technique.findAll({
       attributes: ['id', 'nombre'],
       where: {
         estado: [1],
       },
-    })
-    res.send({ data: { type, deterioration, material, integrity, state, technique }, message: 'Datos consultados correctamente!' });
+    });
+    res.send({
+      data: {
+        type, deterioration, material, integrity, state, technique,
+      },
+      message: 'Datos consultados correctamente!',
+    });
   } catch (err) {
     console.error(err.stack);
     res.status(500).send({ message: err.message || 'Error al consultar informacion.' });
@@ -178,7 +184,11 @@ exports.deletePiece = async (req, res) => {
     );
     if (numFilasAfectadas > 0) {
       // Busca el usuario después de la actualización
-      const pieceDespues = await Piece.findOne({ where: { numero_ordinal: id }, returning: true, transaction: t });
+      const pieceDespues = await Piece.findOne({
+        where: { numero_ordinal: id },
+        returning: true,
+        transaction: t,
+      });
       // Crea el historial de la pieza dentro de la transacción
       await PieceHistory.create({
         piece_id: pieceDespues.numero_ordinal,
@@ -207,8 +217,8 @@ exports.deletePiece = async (req, res) => {
 exports.updatePiece = async (req, res) => {
   let t;
   try {
-    const imagen1 = req.files['imagen1'] ? req.files['imagen1'][0] : null;
-    const imagen2 = req.files['imagen2'] ? req.files['imagen2'][0] : null;
+    const imagen1 = req.files.imagen1 ? req.files.imagen1[0] : null;
+    const imagen2 = req.files.imagen2 ? req.files.imagen2[0] : null;
 
     const imagen11 = imagen1 ? fs.readFileSync(imagen1.path) : null;
     const imagen12 = imagen2 ? fs.readFileSync(imagen2.path) : null;
@@ -271,7 +281,11 @@ exports.updatePiece = async (req, res) => {
     if (imagen2) fs.unlinkSync(imagen2.path);
     if (numFilasAfectadas > 0) {
       // Busca el pieza después de la actualización
-      const pieceDespues = await Piece.findOne({ where: { numero_ordinal: id }, returning: true, transaction: t });
+      const pieceDespues = await Piece.findOne({
+        where: { numero_ordinal: id },
+        returning: true,
+        transaction: t,
+      });
       // Elimina roles existentes y establece nuevos roles
       // Obtiene los roles actuales del usuario
       const deteriorosActuales = await pieceDespues.getOpcion_deterioros();
@@ -283,7 +297,7 @@ exports.updatePiece = async (req, res) => {
       await pieceDespues.removeOpcion_deterioros(deteriorosActuales, { transaction: t });
 
       if (materiales) {
-        console.log("materiales: " + JSON.stringify(materiales))
+        console.log(`materiales: ${JSON.stringify(materiales)}`);
         const materialesEncontrados = await Material.findAll({
           where: {
             nombre: {

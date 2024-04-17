@@ -22,8 +22,19 @@ module.exports = {
     sourceType: 'module',
   },
   rules: { 
-    'no-console': 'warn',
-    'no-use-before-define': 'warn', 
-    'spaced-comment': 'warn' 
+    'no-console': 'off',
+    'no-use-before-define': 'warn',
+    'unexpected-unnamed-function':'off',
+    'spaced-comment': 'warn',
+    'no-plusplus': ["error", { "allowForLoopAfterthoughts": true }],
+    'no-tabs': ["error", { "allowIndentationTabs": true }],
+    'camelcase': 'off',
   }, 
+  settings: {
+    "require/resolver": {
+      "node": {
+        "extensions": [".js", ".jsx"]
+      }
+    }
+  }
 };

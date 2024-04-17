@@ -1,4 +1,5 @@
 const { Sequelize, DataTypes } = require('sequelize');
+// eslint-disable-next-line import/no-unresolved
 const pgvector = require('pgvector/sequelize');
 const config = require('../config/db.config');
 
@@ -36,7 +37,7 @@ db.visit = require('./visit.model')(sequelize, Sequelize);
 db.material = require('./material.model')(sequelize, Sequelize);
 db.country = require('./country.model')(sequelize, Sequelize);
 db.deterioration = require('./deterioration_option.model')(sequelize, Sequelize);
-db.state_integrity = require('./state_integrity.model')(sequelize, Sequelize);
+db.stateIntegrity = require('./state_integrity.model')(sequelize, Sequelize);
 db.technique = require('./technique.model')(sequelize, Sequelize);
 
 // Asociación usuario-roles
@@ -96,7 +97,7 @@ db.material.belongsToMany(db.piece, {
   targetKey: 'numero_ordinal',
 });
 // Asociación piezas-estadointegridad
-db.piece.belongsTo(db.state_integrity, {
+db.piece.belongsTo(db.stateIntegrity, {
   foreignKey: 'estado_integridad',
   targetKey: 'id',
   as: 'estado_deterioro_id',

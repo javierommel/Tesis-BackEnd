@@ -1,5 +1,3 @@
-const { STRING } = require('sequelize');
-
 module.exports = (sequelize, Sequelize) => {
   const Piece = sequelize.define('piezas', {
     numero_ordinal: {

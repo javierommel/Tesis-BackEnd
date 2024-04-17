@@ -1,5 +1,5 @@
 module.exports = (sequelize, Sequelize) => {
-  const State_integrity = sequelize.define('estado_integridades', {
+  const stateIntegrity = sequelize.define('estado_integridades', {
     id: {
       type: Sequelize.INTEGER,
       primaryKey: true,
@@ -17,5 +17,5 @@ module.exports = (sequelize, Sequelize) => {
     },
   });
 
-  return State_integrity;
+  return stateIntegrity;
 };

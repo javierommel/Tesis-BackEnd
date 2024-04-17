@@ -24,7 +24,7 @@ exports.moderatorBoard = (req, res) => {
 
 exports.getCommentList = (req, res) => {
   try {
-    const { page, pageSize, usuario } = req.body;
+    const { page, pageSize } = req.body;
 
     const offset = (page - 1) * pageSize;
 
@@ -43,7 +43,6 @@ exports.getCommentList = (req, res) => {
           estado: [0, 1],
         },
       }).then((count) => {
-
         const totalPages = Math.ceil(count / pageSize); // Número total de páginas
 
         console.log('Número total de páginas:', totalPages);
@@ -51,8 +50,10 @@ exports.getCommentList = (req, res) => {
         // Lógica para determinar la página siguiente y anterior
         const nextPage = page < totalPages ? page + 1 : null;
         const prevPage = page > 1 ? page - 1 : null;
-        res.send({ currentPage: page, totalPages: totalPages, nextPage: nextPage, prevPage: prevPage, total: count, data, message: 'Consulta realizada correctamente!' });
-      })
+        res.send({
+          currentPage: page, totalPages, nextPage, prevPage, total: count, data, message: 'Consulta realizada correctamente!',
+        });
+      });
     })
       .catch((err) => {
         res.status(500).send({ message: err.message });
@@ -124,7 +125,6 @@ exports.getComment = (req, res) => {
     }).catch((err) => {
       res.status(500).send({ message: err.message });
     });
-
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Error al recuperar usuarios.' });
