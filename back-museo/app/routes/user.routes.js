@@ -42,15 +42,15 @@ module.exports = function (app) {
     controller.adminBoard,
   );
 
-  app.post('/api/auth/getuser', controller.getUser);
+  app.post('/api/auth/getuser', authJwt.verifyToken, controller.getUser);
 
-  app.post('/api/auth/getuserid', controller.getUserId);
+  app.post('/api/auth/getuserid', authJwt.verifyToken, controller.getUserId);
 
-  app.post('/api/auth/deleteuser', controller.deleteUser);
+  app.post('/api/auth/deleteuser', authJwt.verifyToken, controller.deleteUser);
 
-  app.post('/api/auth/updateuser', controller.updateUser);
+  app.post('/api/auth/updateuser', authJwt.verifyToken, controller.updateUser);
 
-  app.post('/api/auth/updateuserprofile', upload.single('avatar'), controller.updateUserProfile);
+  app.post('/api/auth/updateuserprofile', [authJwt.verifyToken, upload.single('avatar')], controller.updateUserProfile);
 
   app.post('/api/auth/addusergoogle', upload.single('avatar'), controller.addUserGoogle);
 };

@@ -30,12 +30,12 @@ module.exports = function (app) {
     controller.adminBoard,
   );
 
-  app.post('/api/auth/getcomment', controller.getCommentList);
-  app.post('/api/auth/addcomment', controller.addComment);
+  app.post('/api/auth/getcomment', authJwt.verifyToken, controller.getCommentList);
+  app.post('/api/auth/addcomment', authJwt.verifyToken, controller.addComment);
 
   app.post('/api/auth/getcommentprincipal', controller.getComment);
 
-  app.post('/api/auth/deletecomment', controller.deleteComment);
+  app.post('/api/auth/deletecomment', authJwt.verifyToken, controller.deleteComment);
 
-  app.post('/api/auth/updatecomment', controller.updateComment);
+  app.post('/api/auth/updatecomment', authJwt.verifyToken, controller.updateComment);
 };

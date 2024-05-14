@@ -1,6 +1,7 @@
 const path = require('path');
 const multer = require('multer');
 const controller = require('../controllers/piece.controller');
+const { authJwt } = require('../middleware');
 
 module.exports = function (app) {
   app.use((req, res, next) => {
@@ -24,8 +25,8 @@ module.exports = function (app) {
     { name: 'imagen2' },
   ]);
 
-  app.post('/api/auth/getpiece', controller.getPiece);
-  app.post('/api/auth/getinformationpiece', controller.getInformationPieces);
-  app.post('/api/auth/updatepiece', cargarArchivos, controller.updatePiece);
-  app.post('/api/auth/deletepiece', controller.deletePiece);
+  app.post('/api/auth/getpiece', authJwt.verifyToken, controller.getPiece);
+  app.post('/api/auth/getinformationpiece', authJwt.verifyToken, controller.getInformationPieces);
+  app.post('/api/auth/updatepiece', [authJwt.verifyToken, cargarArchivos], controller.updatePiece);
+  app.post('/api/auth/deletepiece', authJwt.verifyToken, controller.deletePiece);
 };

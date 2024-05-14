@@ -1,5 +1,6 @@
 const path = require('path');
 const multer = require('multer');
+const { authJwt } = require('../middleware');
 const controller = require('../controllers/general.controller');
 
 module.exports = function (app) {
@@ -27,5 +28,5 @@ module.exports = function (app) {
 
   app.post('/api/general/getcountries', controller.getCountry);
   app.post('/api/general/getcontent', controller.getContent);
-  app.post('/api/general/updatecontent', cargarArchivos, controller.updateContent);
+  app.post('/api/general/updatecontent', [authJwt.verifyToken, cargarArchivos], controller.updateContent);
 };
