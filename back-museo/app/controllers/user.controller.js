@@ -5,6 +5,7 @@ const db = require('../models');
 const User = db.user;
 const Role = db.role;
 const UserHistory = db.userhistory;
+const Visit = db.visit;
 const { sequelize } = db;
 const { Op } = db.Sequelize;
 
@@ -378,5 +379,29 @@ exports.addUserGoogle = async (req, res) => {
       await t.rollback();
     }
     res.status(500).send({ message: err.message || 'Error al registrar el usuario.' });
+  }
+};
+
+exports.saveQuestion = async (req, res) => {
+  let t;
+  try {
+    const {
+      sesion, question, usuario_modificacion,
+    } = req.body;
+    t = await sequelize.transaction();
+    await Visit.create({
+      sesion: sesion,
+      usuario: usuario_modificacion,
+      fecha_visita: new Date(),
+      pregunta: question,
+    }, { transaction: t });
+    await t.commit();
+    res.send({ message: 'Visita guardada correctamente!' });
+  } catch (err) {
+    console.error(err.stack);
+    if (t) {
+      await t.rollback();
+    }
+    res.status(500).send({ message: err.message || 'Error al guardar visita.' });
   }
 };

@@ -1,6 +1,11 @@
 module.exports = (sequelize, Sequelize) => {
   const Visit = sequelize.define('visitas', {
     id: {
+      type: Sequelize.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
+    },
+    sesion: {
       type: Sequelize.STRING,
       primaryKey: true,
     },

@@ -7,15 +7,18 @@ module.exports = (sequelize, Sequelize, DataTypes) => {
         primaryKey: true,
       },
       embedding: {
-        type: DataTypes.VECTOR(3),
+        type: DataTypes.VECTOR(1536),
       },
       titulo: {
         type: Sequelize.STRING,
       },
       texto: {
+        type: Sequelize.TEXT,
+      },
+      autor: {
         type: Sequelize.STRING,
       },
-      documento: {
+      siglo: {
         type: Sequelize.STRING,
       },
     },

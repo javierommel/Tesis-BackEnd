@@ -53,4 +53,8 @@ module.exports = function (app) {
   app.post('/api/auth/updateuserprofile', [authJwt.verifyToken, upload.single('avatar')], controller.updateUserProfile);
 
   app.post('/api/auth/addusergoogle', upload.single('avatar'), controller.addUserGoogle);
+
+  app.post('/api/auth/savequestion', authJwt.verifyToken, controller.saveQuestion);
+
+
 };
