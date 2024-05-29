@@ -33,7 +33,7 @@ module.exports = (sequelize, Sequelize) => {
       type: Sequelize.STRING,
     },
     anio: {
-      type: Sequelize.INTEGER,
+      type: Sequelize.STRING,
     },
     alto: {
       type: Sequelize.FLOAT,
