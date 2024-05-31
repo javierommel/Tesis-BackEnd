@@ -386,12 +386,12 @@ exports.saveQuestion = async (req, res) => {
   let t;
   try {
     const {
-      sesion, question, usuario_modificacion,
+      token, question, user,
     } = req.body;
     t = await sequelize.transaction();
     await Visit.create({
-      sesion: sesion,
-      usuario: usuario_modificacion,
+      sesion: token,
+      usuario: user,
       fecha_visita: new Date(),
       pregunta: question,
     }, { transaction: t });

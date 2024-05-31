@@ -5,6 +5,7 @@ const config = require('../config/auth.config');
 const mail = require('./mail.controller');
 
 const User = db.user;
+const Visit = db.visit;
 const UserHistory = db.userhistory;
 const Role = db.role;
 const { Op } = db.Sequelize;
@@ -107,6 +108,14 @@ exports.signin = (req, res) => {
           authorities.push(`ROLE_${roles[i].nombre.toUpperCase()}`);
           rolesUsuario.push(roles[i].id);
         }
+        //Guardar inicio de visita
+        Visit.create({
+          sesion: token,
+          usuario: user.usuario,
+          fecha_visita: new Date(),
+          pregunta: '',
+        });
+
         res.status(200).send({
           id: user.usuario,
           name: user.nombre,

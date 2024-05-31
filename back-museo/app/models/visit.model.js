@@ -7,7 +7,6 @@ module.exports = (sequelize, Sequelize) => {
     },
     sesion: {
       type: Sequelize.STRING,
-      primaryKey: true,
     },
     usuario: {
       type: Sequelize.STRING,
