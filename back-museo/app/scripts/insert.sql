@@ -319,3 +319,18 @@ INSERT INTO public.paises VALUES(237, 'YE', 'Yemen' , 1, current_timestamp, curr
 INSERT INTO public.paises VALUES(238, 'DJ', 'Yibuti' , 1, current_timestamp, current_timestamp);
 INSERT INTO public.paises VALUES(239, 'ZM', 'Zambia' , 1, current_timestamp, current_timestamp);
 INSERT INTO public.paises VALUES(240, 'ZW', 'Zimbabue' , 1, current_timestamp, current_timestamp);
+
+/*TABLA MESES*/
+INSERT INTO public.meses (id, nombre, "createdAt", "updatedAt") VALUES
+(1, 'Enero', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(2, 'Febrero', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(3, 'Marzo', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(4, 'Abril', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(5, 'Mayo', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(6, 'Junio', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(7, 'Julio', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(8, 'Agosto', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(9, 'Septiembre', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(10, 'Octubre', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(11, 'Noviembre', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(12, 'Diciembre', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);

@@ -2,11 +2,13 @@ const fs = require('fs');
 const db = require('../models');
 
 const { sequelize } = db;
+const { Op } = db.Sequelize;
 const Country = db.country;
 const General = db.general;
 const User = db.user;
 const Visit = db.visit;
 const Comment = db.comment;
+const Month = db.month;
 
 exports.getCountry = (req, res) => {
   try {
@@ -108,9 +110,43 @@ exports.updateContent = async (req, res) => {
 exports.getReport = async (req, res) => {
   try {
     const { tipo } = req.body;
-    console.log("tipo: "+tipo)
+    console.log("tipo: " + tipo)
     switch (parseInt(tipo)) {
-      case 1: break;
+      case 1: const subQuery = `
+      SELECT
+        EXTRACT(MONTH FROM v.fecha_visita) AS mes_num,
+        COUNT(DISTINCT CASE WHEN u.pais = 66 THEN v.sesion END) AS nacional,
+        COUNT(DISTINCT CASE WHEN u.pais != 66 THEN v.sesion END) AS internacional
+      FROM
+        visitas v
+      JOIN
+        usuarios u ON v.usuario = u.usuario
+      from 
+        and v.tipo=0
+      GROUP BY
+        EXTRACT(MONTH FROM v.fecha_visita)
+    `;
+        const subQueryResults = await sequelize.query(subQuery, {
+          type: sequelize.QueryTypes.SELECT
+        });
+        const months = await Month.findAll({
+          attributes: ['id', 'nombre'],
+          order: [['id', 'ASC']]
+        });
+
+        const results = months.map(month => {
+          const match = subQueryResults.find(item => item.mes_num === month.id) || { nacional: 0, internacional: 0 };
+          return {
+            nombre: month.nombre,
+            nacional: match.nacional,
+            internacional: match.internacional
+          };
+        });
+
+        // Muestra los resultados
+        console.log(results);
+        res.send({ data: results, message: 'Consulta realizada correctamente!' });
+        break;
       case 2: break;
       case 3: break;
       case 4:

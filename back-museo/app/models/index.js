@@ -36,6 +36,7 @@ db.type = require('./type.model')(sequelize, Sequelize);
 db.visit = require('./visit.model')(sequelize, Sequelize);
 db.material = require('./material.model')(sequelize, Sequelize);
 db.country = require('./country.model')(sequelize, Sequelize);
+db.month = require('./month.model')(sequelize, Sequelize);
 db.deterioration = require('./deterioration_option.model')(sequelize, Sequelize);
 db.stateIntegrity = require('./state_integrity.model')(sequelize, Sequelize);
 db.technique = require('./technique.model')(sequelize, Sequelize);
