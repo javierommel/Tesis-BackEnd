@@ -114,6 +114,7 @@ exports.signin = (req, res) => {
           usuario: user.usuario,
           fecha_visita: new Date(),
           pregunta: '',
+          tipo: 0,
         });
 
         res.status(200).send({

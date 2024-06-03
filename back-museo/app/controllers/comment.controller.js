@@ -3,6 +3,7 @@ const db = require('../models');
 const Comment = db.comment;
 const General = db.general;
 const User = db.user;
+const Visit = db.visit;
 const { sequelize } = db;
 // const Op = db.Sequelize.Op;
 
@@ -88,10 +89,10 @@ exports.addComment = async (req, res) => {
     res.status(500).send({ message: err.message || 'Error al registrar el comentario.' });
   }
 };
-exports.getComment = (req, res) => {
+exports.getComment = async (req, res) => {
   try {
     const { usuario } = req.body;
-    General.findAll({
+    /*General.findAll({
       attributes: ['nrocomentarios'],
       where: { id: 1 },
     }).then((result) => {
@@ -124,7 +125,67 @@ exports.getComment = (req, res) => {
         });
     }).catch((err) => {
       res.status(500).send({ message: err.message });
+    });*/
+    // Obtener nrocomentarios de la tabla General
+    const generalResult = await General.findAll({
+      attributes: ['nrocomentarios'],
+      where: { id: 1 },
     });
+
+    const nrocomentarios = generalResult[0].nrocomentarios;
+
+    // Obtener comentarios de la tabla Comment
+    const comments = await Comment.findAll({
+      attributes: ['id', 'usuario', 'comentario', 'puntuacion', 'fecha_registro', 'estado'],
+      where: {
+        estado: [1],
+      },
+      limit: nrocomentarios,
+      include: {
+        model: User,
+        attributes: ['nombre', 'avatar'],
+        as: 'usuario_id',
+      },
+      order: [
+        ['fecha_registro', 'DESC'],
+      ],
+    });
+
+    const data = comments.length > 0 ? comments : null;
+
+    // Obtener avatar del usuario
+    const user = await User.findAll({
+      attributes: ['avatar'],
+      where: { usuario: req.body.usuario }, // Asegúrate de que 'usuario' proviene de algún lugar, como req.body
+    });
+
+    const avatar = user.length > 0 ? user[0].avatar : null;
+    const comment = await Comment.count({
+      where: {
+        usuario,
+      }
+    });
+    const visit = await Visit.count({
+      distinct: true,
+      col: 'sesion',
+      where: {
+        usuario,
+        tipo: 0
+      }
+    });
+    const search = await Visit.count({
+      where: {
+        usuario,
+        tipo: 1
+      }
+    });
+    const recomendation = await Visit.count({
+      where: {
+        usuario,
+        tipo: 2
+      }
+    });
+    res.send({ data, comment, visit, search, recomendation, avatar, message: 'Consulta realizada correctamente!' });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Error al recuperar usuarios.' });

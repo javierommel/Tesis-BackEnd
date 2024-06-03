@@ -17,6 +17,12 @@ module.exports = (sequelize, Sequelize) => {
     pregunta: {
       type: Sequelize.STRING,
     },
+    tipo:{
+      type: Sequelize.INTEGER,
+    },
+    id_piece: {
+      type: Sequelize.INTEGER,
+    },
   });
 
   return Visit;

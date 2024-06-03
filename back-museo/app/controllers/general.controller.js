@@ -4,6 +4,10 @@ const db = require('../models');
 const { sequelize } = db;
 const Country = db.country;
 const General = db.general;
+const User = db.user;
+const Visit = db.visit;
+const Comment = db.comment;
+
 exports.getCountry = (req, res) => {
   try {
     Country.findAll({
@@ -20,16 +24,27 @@ exports.getCountry = (req, res) => {
   }
 };
 
-exports.getContent = (req, res) => {
+exports.getContent = async (req, res) => {
   try {
-    General.findAll({
+    const general = await General.findAll({
       attributes: ['titulo', 'contenido', 'nrocomentarios', 'imagen1', 'imagen2', 'imagen3', 'imagen4'],
       where: { id: 1 },
-    }).then((result) => {
-      res.send({ data: result, message: 'Consulta realizada correctamente!' });
-    }).catch((err) => {
-      res.status(500).send({ message: err.message });
+    })
+    const user = await User.count();
+    const visit = await Visit.count({
+      distinct: true,
+      col: 'sesion'
     });
+    const result = await Comment.findOne({
+      attributes: [
+        [
+          sequelize.literal('ROUND(AVG(puntuacion) * 100 / 5)'),
+          'average_percentage'
+        ]
+      ]
+    });
+    const averagePercentage = result.getDataValue('average_percentage');
+    res.send({ data: { general: general, nrouser: user, nrovisit: visit, porcentage: averagePercentage }, message: 'Consulta realizada correctamente!' });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Error al recuperar contenido.' });
@@ -87,5 +102,34 @@ exports.updateContent = async (req, res) => {
       await t.rollback();
     }
     res.status(500).send({ message: err.message || 'Error al modificar datos generales.' });
+  }
+};
+
+exports.getReport = async (req, res) => {
+  try {
+    const { tipo } = req.body;
+    console.log("tipo: "+tipo)
+    switch (parseInt(tipo)) {
+      case 1: break;
+      case 2: break;
+      case 3: break;
+      case 4:
+        console.log("tipo: 123")
+        const puntuacionCounts = await Comment.findAll({
+          attributes: [
+            [sequelize.fn('COUNT', sequelize.col('puntuacion')), 'count'],
+            'puntuacion'
+          ],
+          group: ['puntuacion'],
+          order: [['puntuacion', 'DESC']]
+        });
+        console.log(puntuacionCounts)
+        res.send({ data: puntuacionCounts, message: 'Consulta realizada correctamente!' });
+        break;
+    }
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Error al recuperar reporte.' });
   }
 };

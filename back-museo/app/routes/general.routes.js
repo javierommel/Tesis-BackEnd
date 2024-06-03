@@ -28,5 +28,6 @@ module.exports = function (app) {
 
   app.post('/api/general/getcountries', controller.getCountry);
   app.post('/api/general/getcontent', controller.getContent);
+  app.post('/api/general/getreport', controller.getReport);
   app.post('/api/general/updatecontent', [authJwt.verifyToken, cargarArchivos], controller.updateContent);
 };
