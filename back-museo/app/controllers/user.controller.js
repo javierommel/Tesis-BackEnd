@@ -394,6 +394,7 @@ exports.saveQuestion = async (req, res) => {
       usuario: user,
       fecha_visita: new Date(),
       pregunta: question,
+      tipo: 3,
     }, { transaction: t });
     await t.commit();
     res.send({ message: 'Visita guardada correctamente!' });

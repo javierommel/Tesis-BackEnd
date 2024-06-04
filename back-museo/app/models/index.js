@@ -37,6 +37,7 @@ db.visit = require('./visit.model')(sequelize, Sequelize);
 db.material = require('./material.model')(sequelize, Sequelize);
 db.country = require('./country.model')(sequelize, Sequelize);
 db.month = require('./month.model')(sequelize, Sequelize);
+db.puntuaction = require('./puntuaction.model')(sequelize, Sequelize);
 db.deterioration = require('./deterioration_option.model')(sequelize, Sequelize);
 db.stateIntegrity = require('./state_integrity.model')(sequelize, Sequelize);
 db.technique = require('./technique.model')(sequelize, Sequelize);
@@ -131,6 +132,14 @@ db.visit.belongsTo(db.user, {
   as: 'usuario_id',
 });
 
+// Asociación visitas-piezas
+db.visit.belongsTo(db.piece, {
+  foreignKey: 'id_piece',
+  targetKey: 'numero_ordinal',
+});
+
+db.piece.hasMany(db.visit, { foreignKey: 'id_piece', sourceKey: 'numero_ordinal' });
+
 // Asociación piezas-usuarios
 db.piece.belongsTo(db.user, {
   foreignKey: 'usuario_modificacion',
@@ -150,7 +159,7 @@ db.user.hasMany(db.userhistory, {
   foreignKey: 'userId',
 });
 
-// Asociación usuario-usuario_historial
+// Asociación pieza-pieza_historial
 db.piece.hasMany(db.piecehistory, {
   foreignKey: 'pieceId',
 });

@@ -9,6 +9,8 @@ const User = db.user;
 const Visit = db.visit;
 const Comment = db.comment;
 const Month = db.month;
+const Year = db.year;
+const Piece = db.piece;
 
 exports.getCountry = (req, res) => {
   try {
@@ -112,55 +114,116 @@ exports.getReport = async (req, res) => {
     const { tipo } = req.body;
     console.log("tipo: " + tipo)
     switch (parseInt(tipo)) {
-      case 1: const subQuery = `
-      SELECT
+      case 1: const query1 = `
+        select m.nombre, v.nacional, v.internacional
+	      from(
+	      SELECT
         EXTRACT(MONTH FROM v.fecha_visita) AS mes_num,
         COUNT(DISTINCT CASE WHEN u.pais = 66 THEN v.sesion END) AS nacional,
         COUNT(DISTINCT CASE WHEN u.pais != 66 THEN v.sesion END) AS internacional
-      FROM
-        visitas v
-      JOIN
-        usuarios u ON v.usuario = u.usuario
-      from 
+        FROM
+        visitas v, usuarios u 
+		    where v.usuario = u.usuario
         and v.tipo=0
-      GROUP BY
-        EXTRACT(MONTH FROM v.fecha_visita)
-    `;
-        const subQueryResults = await sequelize.query(subQuery, {
+        GROUP BY
+        EXTRACT(MONTH FROM v.fecha_visita)) v
+		    right outer join meses m	  
+        on m.id=v.mes_num
+        `;
+        const respuesta1 = await sequelize.query(query1, {
           type: sequelize.QueryTypes.SELECT
         });
-        const months = await Month.findAll({
-          attributes: ['id', 'nombre'],
-          order: [['id', 'ASC']]
-        });
 
-        const results = months.map(month => {
-          const match = subQueryResults.find(item => item.mes_num === month.id) || { nacional: 0, internacional: 0 };
-          return {
-            nombre: month.nombre,
-            nacional: match.nacional,
-            internacional: match.internacional
-          };
-        });
-
-        // Muestra los resultados
-        console.log(results);
-        res.send({ data: results, message: 'Consulta realizada correctamente!' });
+        res.send({ data: respuesta1, message: 'Consulta realizada correctamente!' });
         break;
-      case 2: break;
-      case 3: break;
+      case 2:
+        const query2 = `
+        select u.usuario as Usuario, u.nombre as Nombre, COUNT(u.nombre) as NroVisitas, p.nombre as Pais, (extract(year from  CURRENT_DATE)-u.fnacimiento) as Edad
+        from visitas v, usuarios u, paises p
+        where v.usuario=u.usuario
+        and v.tipo=0
+        and u.pais=p.id
+        group by u.usuario, u.nombre, p.nombre, (extract(year from  CURRENT_DATE)-u.fnacimiento);
+      `;
+        const respuesta2 = await sequelize.query(query2, {
+          type: sequelize.QueryTypes.SELECT // Especifica que el resultado es una selección
+        })
+        console.log(respuesta2)
+        res.send({ data: respuesta2, message: 'Consulta realizada correctamente!' });
+        break;
+      case 3:
+        const query3 = `
+        select r.usuario as Usuario, r.nombre as Nombre, round(EXTRACT(EPOCH FROM (r.fecha_salida - r.fecha_ingreso)) / 60,2) AS Tiempo, r.pais as Pais, r.edad as Edad, r.fecha_ingreso, r.fecha_salida
+        from 
+        (select a.usuario as usuario, u.nombre as nombre, 
+        max(a.fecha_ingreso) as fecha_ingreso, max(a.fecha_salida) as fecha_salida, 
+        p.nombre as pais,  (extract(year from  CURRENT_DATE)-u.fnacimiento) as edad , a.sesion
+        from 
+        (select v.usuario, v.sesion,
+        case when v.tipo=0 then (v."createdAt") end as fecha_ingreso,
+        case when v.tipo=3 then (v."createdAt") end as fecha_salida
+        from visitas v
+        where v.tipo in (0,3)) a, usuarios u, paises p
+        where a.usuario=u.usuario
+        and u.pais=p.id
+        group by a.usuario, u.nombre, a.sesion, p.nombre, (extract(year from  CURRENT_DATE)-u.fnacimiento)) r
+        order by EXTRACT(EPOCH FROM (r.fecha_salida - r.fecha_ingreso)) / 60 desc;
+        `;
+
+        const respuesta3 = await sequelize.query(query3, {
+          type: sequelize.QueryTypes.SELECT // Especifica que el resultado es una selección
+        })
+
+        res.send({ data: respuesta3, message: 'Consulta realizada correctamente!' });
+        break;
       case 4:
-        console.log("tipo: 123")
-        const puntuacionCounts = await Comment.findAll({
-          attributes: [
-            [sequelize.fn('COUNT', sequelize.col('puntuacion')), 'count'],
-            'puntuacion'
-          ],
-          group: ['puntuacion'],
-          order: [['puntuacion', 'DESC']]
-        });
-        console.log(puntuacionCounts)
-        res.send({ data: puntuacionCounts, message: 'Consulta realizada correctamente!' });
+        const query4 = `
+        select COALESCE(v.count, 0) as count, p.id as puntuacion 
+        from
+        (SELECT COUNT(puntuacion) count, puntuacion 
+        FROM comentarios 
+        GROUP BY puntuacion ) v
+        right outer join puntuaciones p
+        on p.id = v.puntuacion
+        ORDER BY p.id DESC;
+      `;
+        const respuesta4 = await sequelize.query(query4, {
+          type: sequelize.QueryTypes.SELECT // Especifica que el resultado es una selección
+        })
+        res.send({ data: respuesta4, message: 'Consulta realizada correctamente!' });
+        break;
+      case 5:
+        const query = `
+          SELECT p.nombre, COUNT(v.id_piece) AS count_visits
+          FROM visitas v
+          JOIN piezas p ON p.numero_ordinal = v.id_piece
+          WHERE v.tipo = 1
+          GROUP BY p.nombre
+          ORDER BY count_visits DESC
+          LIMIT 8;
+        `;
+
+        const respuesta5 = await sequelize.query(query, {
+          type: sequelize.QueryTypes.SELECT // Especifica que el resultado es una selección
+        })
+
+        res.send({ data: respuesta5, message: 'Consulta realizada correctamente!' });
+        break;
+      case 6:
+        const query6 = `
+          SELECT p.nombre, COUNT(v.id_piece) AS count_visits
+          FROM visitas v
+          JOIN piezas p ON p.numero_ordinal = v.id_piece
+          WHERE v.tipo = 1
+          GROUP BY p.nombre
+          ORDER BY count_visits DESC
+          LIMIT 8;
+        `;
+
+        const respuesta6 = await sequelize.query(query6, {
+          type: sequelize.QueryTypes.SELECT // Especifica que el resultado es una selección
+        })
+        res.send({ data: respuesta6, message: 'Consulta realizada correctamente!' });
         break;
     }
 

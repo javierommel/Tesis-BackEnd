@@ -22,6 +22,7 @@ module.exports = (sequelize, Sequelize) => {
     },
     id_piece: {
       type: Sequelize.INTEGER,
+      allowNull: true,
     },
   });
 

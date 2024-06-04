@@ -6,7 +6,7 @@ module.exports = (sequelize, Sequelize) => {
     },
     iso: {
       type: Sequelize.STRING,
-      allowNull: false,
+      allowNull: true,
     },
     nombre: {
       type: Sequelize.STRING,
