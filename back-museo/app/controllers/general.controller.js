@@ -115,7 +115,7 @@ exports.getReport = async (req, res) => {
     console.log("tipo: " + tipo)
     switch (parseInt(tipo)) {
       case 1: const query1 = `
-        select m.nombre, v.nacional, v.internacional
+        select m.nombre as nombre, COALESCE(v.nacional,0) as nacional, COALESCE(v.internacional,0) as internacional
 	      from(
 	      SELECT
         EXTRACT(MONTH FROM v.fecha_visita) AS mes_num,
@@ -194,13 +194,15 @@ exports.getReport = async (req, res) => {
         break;
       case 5:
         const query = `
-          SELECT p.nombre, COUNT(v.id_piece) AS count_visits
+          SELECT p.numero_ordinal, p.nombre, 
+          SUM(CASE WHEN v.tipo = 1 THEN 1 ELSE 0 END) AS visitas,
+          SUM(CASE WHEN v.tipo = 2 THEN 1 ELSE 0 END) AS recomendaciones
           FROM visitas v
           JOIN piezas p ON p.numero_ordinal = v.id_piece
-          WHERE v.tipo = 1
-          GROUP BY p.nombre
-          ORDER BY count_visits DESC
-          LIMIT 8;
+          WHERE v.tipo IN (1, 2)
+          GROUP BY p.numero_ordinal, p.nombre
+          ORDER BY visitas, recomendaciones DESC
+          LIMIT 7;
         `;
 
         const respuesta5 = await sequelize.query(query, {
@@ -208,22 +210,6 @@ exports.getReport = async (req, res) => {
         })
 
         res.send({ data: respuesta5, message: 'Consulta realizada correctamente!' });
-        break;
-      case 6:
-        const query6 = `
-          SELECT p.nombre, COUNT(v.id_piece) AS count_visits
-          FROM visitas v
-          JOIN piezas p ON p.numero_ordinal = v.id_piece
-          WHERE v.tipo = 1
-          GROUP BY p.nombre
-          ORDER BY count_visits DESC
-          LIMIT 8;
-        `;
-
-        const respuesta6 = await sequelize.query(query6, {
-          type: sequelize.QueryTypes.SELECT // Especifica que el resultado es una selección
-        })
-        res.send({ data: respuesta6, message: 'Consulta realizada correctamente!' });
         break;
     }
 
