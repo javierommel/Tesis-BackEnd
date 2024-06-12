@@ -219,7 +219,6 @@ exports.updateComment = async (req, res) => {
   let t;
   try {
     const { id, estado, usuario_modificacion } = req.body;
-    console.log(`id: ${id} estado: ${estado}`);
     t = await sequelize.transaction();
     await Comment.update(
       {

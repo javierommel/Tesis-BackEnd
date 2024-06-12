@@ -1,6 +1,6 @@
 require('dotenv').config();
 const fs = require('fs');
-const axios= require('axios')
+const axios = require('axios')
 const FormData = require('form-data');
 
 const PROCESS_URL = process.env.URL_PROCESS + "servicio1/";
@@ -8,31 +8,27 @@ const PROCESS_URL = process.env.URL_PROCESS + "servicio1/";
 exports.getRecomendation = async (req, res) => {
   try {
     const { usuario, tokenid } = req.body;
-    console.log("asdf  "+usuario+"  "+tokenid)
     const formData = new FormData();
     formData.append('usuario', usuario);
     formData.append('tokenid', tokenid);
+    const headers = formData.getHeaders();
     const response = await axios.post(PROCESS_URL + "recomendation", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
+      headers
     }
     );
-    console.log(response.data)
     res.send(response.data);
   } catch (error) {
-    console.error('Error fetching message from Python:', error);
-    res.status(500).send({mensaje:'Error fetching message', retcode:96 });
+    console.error('Error al obtener recomendación Python:', error);
+    res.status(500).send({ mensaje: 'Error al obtener recomendacion', retcode: 96 });
   }
 };
 
 exports.getTranscribe = async (req, res) => {
   try {
     const { language, tipo } = req.body;
-    console.log("asdf  "+language+"  "+tipo)
     const file = req.file;
     if (!file) {
-      return res.status(400).send('No file uploaded.');
+      return res.status(400).send('Archivo de audio no encontrado.');
     }
     const formData = new FormData();
     formData.append('audio', fs.createReadStream(file.path));
@@ -43,7 +39,6 @@ exports.getTranscribe = async (req, res) => {
       headers
     }
     );
-    console.log(response.data)
     fs.unlink(file.path, (err) => {
       if (err) {
         console.error('Error al borrar el audio:', err);
@@ -53,15 +48,14 @@ exports.getTranscribe = async (req, res) => {
     });
     res.send(response.data);
   } catch (error) {
-    console.error('Error fetching message from Python:', error);
-    res.status(500).send({mensaje:error, retcode:96 });
+    console.error('Error transcribir Python:', error);
+    res.status(500).send({ mensaje: error, retcode: 96 });
   }
 };
 
 exports.getChat = async (req, res) => {
   try {
     const { user, token } = req.body;
-    console.log("asdf 1 "+user+"  "+token)
     const formData = new FormData();
     formData.append('user', user);
     formData.append('token', token);
@@ -71,11 +65,10 @@ exports.getChat = async (req, res) => {
       },
     }
     );
-    console.log(response.data)
     res.send(response.data);
   } catch (error) {
-    console.error('Error fetching chat from Python:', error);
-    res.status(500).send({mensaje:'Error fetching message', retcode:96 });
+    console.error('Error al consultar chat Python:', error);
+    res.status(500).send({ mensaje: 'Error al  consultar Chat', retcode: 96 });
   }
 };
 exports.cargarModelo = (req, res) => {
@@ -96,21 +89,32 @@ exports.cargarModelo = (req, res) => {
   }
 };
 
-exports.cargarPiezas = (req, res) => {
+exports.cargarPiezas = async (req, res) => {
   try {
-    const { usuario } = req.body;
+    const { usuario_modificacion } = req.body;
+    const file = req.file;
+    if (!file) {
+      return res.status(400).send('Archivo no cargado.');
+    }
     const formData = new FormData();
-    formData.append('usuario', usuario);
-    const response = axios.post(PROCESS_URL + "cargarpiezas", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
+    formData.append('usuario_modificacion', usuario_modificacion);
+    formData.append('archivo', fs.createReadStream(file.path));
+    const headers = formData.getHeaders();
+    const response = await axios.post(PROCESS_URL + "cargarpiezas", formData, {
+      headers
     }
     );
+    fs.unlink(file.path, (err) => {
+      if (err) {
+        console.error('Error al borrar el archivo:', err);
+      } else {
+        console.log('Archivo borrado exitosamente');
+      }
+    });
     res.send(response.data);
   } catch (error) {
     console.error('Error fetching message from Python:', error);
-    res.status(500).send('Error fetching message');
+    res.status(500).json({ message: 'Error al cargar piezas de arte.' });
   }
 };
 

@@ -86,7 +86,6 @@ exports.getUser = (req, res) => {
         }).then((count) => {
           const totalPages = Math.ceil(count / pageSize); // Número total de páginas
 
-          console.log('Usuarios de la página actual:', users);
           console.log('Número total de páginas:', totalPages);
 
           // Lógica para determinar la página siguiente y anterior
@@ -99,6 +98,7 @@ exports.getUser = (req, res) => {
       });
     })
       .catch((err) => {
+        console.error(err.stack);
         res.status(500).send({ message: err.message });
       });
   } catch (err) {

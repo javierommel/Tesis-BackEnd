@@ -112,7 +112,7 @@ exports.updateContent = async (req, res) => {
 exports.getReport = async (req, res) => {
   try {
     const { tipo } = req.body;
-    console.log("tipo: " + tipo)
+    
     switch (parseInt(tipo)) {
       case 1: const query1 = `
         select m.nombre as nombre, COALESCE(v.nacional,0) as nacional, COALESCE(v.internacional,0) as internacional
@@ -148,7 +148,7 @@ exports.getReport = async (req, res) => {
         const respuesta2 = await sequelize.query(query2, {
           type: sequelize.QueryTypes.SELECT // Especifica que el resultado es una selección
         })
-        console.log(respuesta2)
+        
         res.send({ data: respuesta2, message: 'Consulta realizada correctamente!' });
         break;
       case 3:

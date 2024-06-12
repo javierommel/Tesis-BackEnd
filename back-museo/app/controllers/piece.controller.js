@@ -5,7 +5,7 @@ const Piece = db.piece;
 const Type = db.type;
 const Deterioration = db.deterioration;
 const Material = db.material;
-const Stateintegrity = db.state_integrity;
+const Stateintegrity = db.stateIntegrity;
 const State = db.state;
 const Technique = db.technique;
 const PieceHistory = db.piecehistory;
@@ -54,7 +54,7 @@ exports.getPiece = (req, res) => {
             numero_historico: piece.numero_historico,
             codigo_inpc: piece.codigo_inpc,
             tipo_bien: piece.tipo_bien,
-            tipo_biens: piece.tipo_id.nombre,
+            tipo_biens: piece.tipo_id?.nombre,
             nombre: piece.nombre,
             otro_nombre: piece.otro_nombre,
             otros_material: piece.otros_material,
@@ -109,6 +109,7 @@ exports.getPiece = (req, res) => {
         });
       })
       .catch((err) => {
+        console.error(err.stack);
         res.status(500).send({ message: err.message });
       });
   } catch (err) {
@@ -297,7 +298,6 @@ exports.updatePiece = async (req, res) => {
       await pieceDespues.removeOpcion_deterioros(deteriorosActuales, { transaction: t });
 
       if (materiales) {
-        console.log(`materiales: ${JSON.stringify(materiales)}`);
         const materialesEncontrados = await Material.findAll({
           where: {
             nombre: {
@@ -331,7 +331,7 @@ exports.updatePiece = async (req, res) => {
         fecha_modificacion: new Date(),
       }, { transaction: t });
       await t.commit();
-      res.send({ message: 'Usuario modificado correctamente!' });
+      res.send({ message: 'Pieza de arte modificada correctamente!' });
     } else {
       await t.rollback();
       res.status(404).send({ message: 'Pieza de arte no encontrado para modificación.' });
