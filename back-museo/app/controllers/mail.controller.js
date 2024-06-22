@@ -60,11 +60,11 @@ exports.sendMail = async (to, token) => {
 		+ '</body>'
 		+ '</html>';
 
-  const user = 'rommel2211@gmail.com';
+  //const user = 'rommel2211@gmail.com';
   const subject = 'Confirmación de Cuenta';
 
   // Configuración de OAuth2
-  const oauth2Client = new OAuth2(
+  /*const oauth2Client = new OAuth2(
     accountTransport.auth.clientId,
     accountTransport.auth.clientSecret,
     'https://developers.google.com/oauthplayground',
@@ -74,17 +74,17 @@ exports.sendMail = async (to, token) => {
     tls: {
       rejectUnauthorized: false,
     },
-  });
+  });*/
 
   // Obtener accessToken
-  oauth2Client.getAccessToken((err, accessToken) => {
+  /*oauth2Client.getAccessToken((err, accessToken) => {
     if (err) {
       console.error('Error al obtener el accessToken:', err);
       return;
-    }
+    }*/
 
     // Configuración del transportador SMTP para Gmail
-    const transporter = nodemailer.createTransport({
+    /*const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
         type: 'OAuth2',
@@ -94,11 +94,12 @@ exports.sendMail = async (to, token) => {
         refreshToken: accountTransport.auth.refreshToken,
         accessToken,
       },
-    });
+    });*/
+	const transporter = nodemailer.createTransport(accountTransport);
 
     // Configuración del correo electrónico a enviar
     const mailOptions = {
-      from: user, // Remitente
+      from: accountTransport.auth.user, // Remitente
       to, // Destinatario
       subject,
       html: mailConfirmacion, // Utiliza html en lugar de text para el contenido del correo
@@ -112,5 +113,5 @@ exports.sendMail = async (to, token) => {
         console.log('Correo enviado:', info.response);
       }
     });
-  });
+  //});
 };
