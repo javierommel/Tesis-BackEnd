@@ -38,4 +38,6 @@ module.exports = function (app) {
   app.post('/api/auth/deletecomment', authJwt.verifyToken, controller.deleteComment);
 
   app.post('/api/auth/updatecomment', authJwt.verifyToken, controller.updateComment);
+
+  app.post('/api/auth/favouritecomment', authJwt.verifyToken, controller.favouriteComment);
 };

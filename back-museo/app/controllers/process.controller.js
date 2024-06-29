@@ -55,10 +55,11 @@ exports.getTranscribe = async (req, res) => {
 
 exports.getChat = async (req, res) => {
   try {
-    const { user, token } = req.body;
+    const { user, token, question } = req.body;
     const formData = new FormData();
     formData.append('user', user);
     formData.append('token', token);
+    formData.append('question', question);
     const response = await axios.post(PROCESS_URL + "chat", formData, {
       headers: {
         "Content-Type": "multipart/form-data",

@@ -36,6 +36,13 @@ module.exports = (sequelize, Sequelize) => {
       type: Sequelize.STRING,
       allowNull: false,
     },
+    destacado: {
+      type: Sequelize.INTEGER,
+      allowNull: true,
+      validate: {
+        isIn: [[0, 1]],
+      },
+    },
   });
 
   return Comment;

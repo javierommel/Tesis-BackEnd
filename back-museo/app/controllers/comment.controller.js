@@ -30,11 +30,12 @@ exports.getCommentList = (req, res) => {
     const offset = (page - 1) * pageSize;
 
     Comment.findAll({
-      attributes: ['id', 'usuario', 'comentario', 'puntuacion', 'fecha_registro', 'estado'],
+      attributes: ['id', 'usuario', 'comentario', 'puntuacion', 'fecha_registro', 'estado','destacado'],
       limit: pageSize,
       where: { estado: [0, 1] },
       offset,
       order: [
+        ['destacado', 'DESC'],
         ['fecha_registro', 'DESC'],
       ],
     }).then((comments) => {
@@ -136,7 +137,7 @@ exports.getComment = async (req, res) => {
 
     // Obtener comentarios de la tabla Comment
     const comments = await Comment.findAll({
-      attributes: ['id', 'usuario', 'comentario', 'puntuacion', 'fecha_registro', 'estado'],
+      attributes: ['id', 'usuario', 'comentario', 'puntuacion', 'fecha_registro', 'estado','destacado'],
       where: {
         estado: [1],
       },
@@ -236,5 +237,29 @@ exports.updateComment = async (req, res) => {
       await t.rollback();
     }
     res.status(500).send({ message: err.message || 'Error al modificar comentario.' });
+  }
+};
+
+exports.favouriteComment = async (req, res) => {
+  let t;
+  try {
+    const { id, usuario_modificacion, destacado } = req.body;
+    t = await sequelize.transaction();
+    await Comment.update(
+      {
+        usuario_modificacion,
+        destacado,
+      },
+      { where: { id }, transaction: t },
+    );
+
+    await t.commit();
+    res.send({ message: 'Comentario destacado correctamente!' });
+  } catch (err) {
+    if (t) {
+      await t.rollback();
+    }
+    console.error(err);
+    res.status(500).send({ message: err.message || 'Error al destacar comentario.' });
   }
 };
