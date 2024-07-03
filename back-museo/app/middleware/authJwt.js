@@ -17,6 +17,10 @@ const verifyToken = (req, res, next) => {
     config.secret,
     (err, decoded) => {
       if (err) {
+        if (req.body.logout) {
+          next()
+          return true;
+        }
         return res.status(401).send({
           message: 'Usuario no autorizado!',
         });

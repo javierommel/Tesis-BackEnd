@@ -35,7 +35,6 @@ exports.getCommentList = (req, res) => {
       where: { estado: [0, 1] },
       offset,
       order: [
-        ['destacado', 'DESC'],
         ['fecha_registro', 'DESC'],
       ],
     }).then((comments) => {
@@ -148,6 +147,7 @@ exports.getComment = async (req, res) => {
         as: 'usuario_id',
       },
       order: [
+        ['destacado', 'DESC'],
         ['fecha_registro', 'DESC'],
       ],
     });
