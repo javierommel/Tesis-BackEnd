@@ -19,6 +19,16 @@ INSERT INTO public.tipos(id, nombre, estado, "createdAt", "updatedAt") VALUES (1
 INSERT INTO public.tipos(id, nombre, estado, "createdAt", "updatedAt") VALUES (11, 'Equipamiento industrial', 1, current_timestamp, current_timestamp);
 INSERT INTO public.tipos(id, nombre, estado, "createdAt", "updatedAt") VALUES (12, 'Textil', 1, current_timestamp, current_timestamp);
 INSERT INTO public.tipos(id, nombre, estado, "createdAt", "updatedAt") VALUES (13, 'Orfebrería', 1, current_timestamp, current_timestamp);
+INSERT INTO public.tipos(id, nombre, estado, "createdAt", "updatedAt") VALUES (14, 'Cerámica', 1, current_timestamp, current_timestamp);
+INSERT INTO public.tipos(id, nombre, estado, "createdAt", "updatedAt") VALUES (15, 'Cerrajería', 1, current_timestamp, current_timestamp);
+INSERT INTO public.tipos(id, nombre, estado, "createdAt", "updatedAt") VALUES (16, 'Cristalería', 1, current_timestamp, current_timestamp);
+INSERT INTO public.tipos(id, nombre, estado, "createdAt", "updatedAt") VALUES (17, 'Imaginería', 1, current_timestamp, current_timestamp);
+INSERT INTO public.tipos(id, nombre, estado, "createdAt", "updatedAt") VALUES (18, 'Juguetería', 1, current_timestamp, current_timestamp);
+INSERT INTO public.tipos(id, nombre, estado, "createdAt", "updatedAt") VALUES (19, 'Litrografía', 1, current_timestamp, current_timestamp);
+INSERT INTO public.tipos(id, nombre, estado, "createdAt", "updatedAt") VALUES (20, 'Ornamento', 1, current_timestamp, current_timestamp);
+INSERT INTO public.tipos(id, nombre, estado, "createdAt", "updatedAt") VALUES (21, 'Papel', 1, current_timestamp, current_timestamp);
+INSERT INTO public.tipos(id, nombre, estado, "createdAt", "updatedAt") VALUES (22, 'Porcelana', 1, current_timestamp, current_timestamp);
+INSERT INTO public.tipos(id, nombre, estado, "createdAt", "updatedAt") VALUES (23, 'No especificado', 1, current_timestamp, current_timestamp);
 
 /*TABLA MATERIALES*/
 INSERT INTO public.materiales(id, nombre, estado, "createdAt", "updatedAt")VALUES (1, 'Metal', 1, current_timestamp, current_timestamp);
@@ -42,11 +52,13 @@ INSERT INTO public.tecnicas (id, nombre, estado, "createdAt", "updatedAt") VALUE
 INSERT INTO public.estado_integridades (id, nombre, estado, "createdAt", "updatedAt") VALUES (1, 'Completo', 1, current_timestamp, current_timestamp);
 INSERT INTO public.estado_integridades (id, nombre, estado, "createdAt", "updatedAt") VALUES (2, 'Incompleto', 1, current_timestamp, current_timestamp);
 INSERT INTO public.estado_integridades (id, nombre, estado, "createdAt", "updatedAt") VALUES (3, 'Fragmento', 1, current_timestamp, current_timestamp);
+INSERT INTO public.estado_integridades (id, nombre, estado, "createdAt", "updatedAt") VALUES (4, 'No especificado', 1, current_timestamp, current_timestamp);
 
 /*TABLA ESTADO_PIEZAS*/
 INSERT INTO public.estado_piezas (id, nombre, estado, "createdAt", "updatedAt") VALUES (1, 'Bueno', 1, current_timestamp, current_timestamp);
 INSERT INTO public.estado_piezas (id, nombre, estado, "createdAt", "updatedAt") VALUES (2, 'Regular', 1, current_timestamp, current_timestamp);
 INSERT INTO public.estado_piezas (id, nombre, estado, "createdAt", "updatedAt") VALUES (3, 'Malo', 1, current_timestamp, current_timestamp);
+INSERT INTO public.estado_piezas (id, nombre, estado, "createdAt", "updatedAt") VALUES (4, 'No especificado', 1, current_timestamp, current_timestamp);
 
 /*TABLA OPCION_DETERIOROS*/
 INSERT INTO public.opcion_deterioros (id, nombre, estado, "createdAt", "updatedAt") VALUES (1, 'abolsados', 1, current_timestamp, current_timestamp);

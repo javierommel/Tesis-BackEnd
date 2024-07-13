@@ -76,6 +76,7 @@ exports.addComment = async (req, res) => {
       puntuacion,
       fecha_registro: new Date().getTime(),
       estado: 1,
+      destacado:0,
       usuario_modificacion: usuario,
     }, { transaction: t });
 

@@ -112,11 +112,11 @@ db.piece.belongsTo(db.state, {
 });
 
 // Asociación piezas-técnicas
-db.piece.belongsTo(db.technique, {
+/*//PREGUNTAR db.piece.belongsTo(db.technique, {
   foreignKey: 'tecnica',
   targetKey: 'id',
   as: 'tecnica_id',
-});
+});*/
 
 // Asociación piezas-tipos
 db.piece.belongsTo(db.type, {

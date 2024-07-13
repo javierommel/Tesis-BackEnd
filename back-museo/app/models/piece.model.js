@@ -12,7 +12,7 @@ module.exports = (sequelize, Sequelize) => {
       type: Sequelize.STRING,
     },
     tipo_bien: {
-      type: Sequelize.INTEGER,
+       type: Sequelize.INTEGER,
     },
     nombre: {
       type: Sequelize.STRING,
@@ -24,7 +24,8 @@ module.exports = (sequelize, Sequelize) => {
       type: Sequelize.STRING,
     },
     tecnica: {
-      type: Sequelize.INTEGER,
+      //PREGUNTAR type: Sequelize.INTEGER,
+      type: Sequelize.STRING,
     },
     autor: {
       type: Sequelize.STRING,
@@ -36,19 +37,22 @@ module.exports = (sequelize, Sequelize) => {
       type: Sequelize.STRING,
     },
     alto: {
-      type: Sequelize.FLOAT,
+      type: Sequelize.STRING,
     },
     ancho: {
-      type: Sequelize.FLOAT,
+      type: Sequelize.STRING,
+    },
+    profundidad: {
+      type: Sequelize.STRING,
     },
     diametro: {
-      type: Sequelize.INTEGER,
+      type: Sequelize.STRING,
     },
     espesor: {
-      type: Sequelize.FLOAT,
+      type: Sequelize.STRING,
     },
     peso: {
-      type: Sequelize.FLOAT,
+      type: Sequelize.STRING,
     },
     inscripcion: {
       type: Sequelize.TEXT,

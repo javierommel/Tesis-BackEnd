@@ -21,6 +21,9 @@ module.exports = (sequelize, Sequelize, DataTypes) => {
       siglo: {
         type: Sequelize.STRING,
       },
+      tipo:{
+        type: Sequelize.STRING,
+      },
     },
     {
       modelName: 'recomendaciones',
