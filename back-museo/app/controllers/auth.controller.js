@@ -76,7 +76,7 @@ exports.signin = (req, res) => {
   })
     .then((user) => {
       if (!user) {
-        return res.status(404).send({ message: 'Usuario no encontrado.' });
+        return res.status(404).send({ message: 'Usuario o Password incorrecto.' });
       }
 
       const passwordIsValid = req.body.google ? true : bcrypt.compareSync(
@@ -87,7 +87,7 @@ exports.signin = (req, res) => {
       if (!passwordIsValid) {
         return res.status(401).send({
           accessToken: null,
-          message: 'Password incorrecto!',
+          message: 'Usuario o Password incorrecto',
         });
       }
 
@@ -97,7 +97,7 @@ exports.signin = (req, res) => {
         {
           algorithm: 'HS256',
           allowInsecureKeySizes: true,
-          expiresIn: 3600, // 24 hours
+          expiresIn: 86400, // 24 hours
         },
       );
 

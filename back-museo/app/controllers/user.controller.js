@@ -371,8 +371,21 @@ exports.addUserGoogle = async (req, res) => {
         fecha_modificacion: new Date(),
       }, { transaction: t });
       await t.commit();
+      res.send({ message: 'Usuario logueado correctamente con google...' });
     }
-    res.send({ message: 'Usuario logueado correctamente con google...' });
+    else
+    {
+      if (userl.usuario===req.body.email) 
+        {
+          res.send({ message: 'Usuario logueado correctamente con google...' });
+        }
+      else 
+      {
+        if (userl.estado===3) res.status(500).send({ message: 'Correo ya asignado a usuario existente. Revise su correo y confime su cuenta' });
+        else res.status(500).send({ message: 'Correo ya asignado a usuario existente' });
+      }
+    }
+    
   } catch (err) {
     console.log(`error: ${err.message} ${err.stack}`);
     if (t) {
