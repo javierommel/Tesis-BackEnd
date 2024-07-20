@@ -375,6 +375,11 @@ exports.addUserGoogle = async (req, res) => {
     }
     else
     {
+      if (req.file) {
+        const { path } = req.file;
+        image = fs.readFileSync(path);
+        fs.unlinkSync(path);
+      }
       if (userl.usuario===req.body.email) 
         {
           res.send({ message: 'Usuario logueado correctamente con google...' });
