@@ -30,7 +30,7 @@ exports.getCommentList = (req, res) => {
     const offset = (page - 1) * pageSize;
 
     Comment.findAll({
-      attributes: ['id', 'usuario', 'comentario', 'puntuacion', 'fecha_registro', 'estado','destacado'],
+      attributes: ['id', 'usuario', 'comentario', 'puntuacion', 'fecha_registro', 'estado', 'destacado'],
       limit: pageSize,
       where: { estado: [0, 1] },
       offset,
@@ -46,7 +46,7 @@ exports.getCommentList = (req, res) => {
       }).then((count) => {
         const totalPages = Math.ceil(count / pageSize); // Número total de páginas
 
-        console.log('Número total de páginas:', totalPages);
+        logger.info('Número total de páginas:'+ totalPages);
 
         // Lógica para determinar la página siguiente y anterior
         const nextPage = page < totalPages ? page + 1 : null;
@@ -57,10 +57,12 @@ exports.getCommentList = (req, res) => {
       });
     })
       .catch((err) => {
+        logger.error('Error consulta comentarios: ' + err.message);
         res.status(500).send({ message: err.message });
       });
   } catch (err) {
-    console.error(err);
+    logger.error('Error al recuperar comentarios: ' + err.message);
+    logger.error(err.stack);
     res.status(500).json({ message: 'Error al recuperar comentarios.' });
   }
 };
@@ -76,17 +78,18 @@ exports.addComment = async (req, res) => {
       puntuacion,
       fecha_registro: new Date().getTime(),
       estado: 1,
-      destacado:0,
+      destacado: 0,
       usuario_modificacion: usuario,
     }, { transaction: t });
 
     await t.commit();
     res.send({ message: 'Comentario registrado correctamente!' });
   } catch (err) {
-    console.error(err);
     if (t) {
       await t.rollback();
     }
+    logger.error('Error al registrar comentarios: ' + err.message);
+    logger.error(err.stack);
     res.status(500).send({ message: err.message || 'Error al registrar el comentario.' });
   }
 };
@@ -137,7 +140,7 @@ exports.getComment = async (req, res) => {
 
     // Obtener comentarios de la tabla Comment
     const comments = await Comment.findAll({
-      attributes: ['id', 'usuario', 'comentario', 'puntuacion', 'fecha_registro', 'estado','destacado'],
+      attributes: ['id', 'usuario', 'comentario', 'puntuacion', 'fecha_registro', 'estado', 'destacado'],
       where: {
         estado: [1],
       },
@@ -189,8 +192,9 @@ exports.getComment = async (req, res) => {
     });
     res.send({ data, comment, visit, search, recomendation, avatar, message: 'Consulta realizada correctamente!' });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Error al recuperar usuarios.' });
+    logger.error('Error al recuperar comentarios: ' + err.message);
+    logger.error(err.stack);
+    res.status(500).json({ message: 'Error al recuperar comentarios.' });
   }
 };
 exports.deleteComment = async (req, res) => {
@@ -212,7 +216,8 @@ exports.deleteComment = async (req, res) => {
     if (t) {
       await t.rollback();
     }
-    console.error(err);
+    logger.error('Error al eliminar comentarios: ' + err.message);
+    logger.error(err.stack);
     res.status(500).send({ message: err.message || 'Error al eliminar comentario.' });
   }
 };
@@ -233,10 +238,11 @@ exports.updateComment = async (req, res) => {
     await t.commit();
     res.send({ message: 'Comentario modificado correctamente!' });
   } catch (err) {
-    console.error(err.stack);
     if (t) {
       await t.rollback();
     }
+    logger.error('Error al modificar comentarios: ' + err.message);
+    logger.error(err.stack);
     res.status(500).send({ message: err.message || 'Error al modificar comentario.' });
   }
 };
@@ -260,7 +266,8 @@ exports.favouriteComment = async (req, res) => {
     if (t) {
       await t.rollback();
     }
-    console.error(err);
+    logger.error('Error al destacar comentarios: ' + err.message);
+    logger.error(err.stack);
     res.status(500).send({ message: err.message || 'Error al destacar comentario.' });
   }
 };

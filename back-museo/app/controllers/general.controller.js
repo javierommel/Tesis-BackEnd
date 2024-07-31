@@ -23,7 +23,8 @@ exports.getCountry = (req, res) => {
       res.status(500).send({ message: err.message });
     });
   } catch (err) {
-    console.error(err);
+    logger.error('Error al recuperar paises: ' + err.message);
+    logger.error(err.stack);
     res.status(500).json({ message: 'Error al recuperar países.' });
   }
 };
@@ -50,7 +51,8 @@ exports.getContent = async (req, res) => {
     const averagePercentage = result.getDataValue('average_percentage');
     res.send({ data: { general: general, nrouser: user, nrovisit: visit, porcentage: averagePercentage }, message: 'Consulta realizada correctamente!' });
   } catch (err) {
-    console.error(err);
+    logger.error('Error al recuperar contenido: ' + err.message);
+    logger.error(err.stack);
     res.status(500).json({ message: 'Error al recuperar contenido.' });
   }
 };
@@ -101,10 +103,11 @@ exports.updateContent = async (req, res) => {
       res.status(404).send({ message: 'Datos generales no encontrados para modificación.' });
     }
   } catch (err) {
-    console.error(err.stack);
     if (t) {
       await t.rollback();
     }
+    logger.error('Error al modificar datos generales: ' + err.message);
+    logger.error(err.stack);
     res.status(500).send({ message: err.message || 'Error al modificar datos generales.' });
   }
 };
@@ -214,7 +217,8 @@ exports.getReport = async (req, res) => {
     }
 
   } catch (err) {
-    console.error(err);
+    logger.error('Error al recuperar reporte: ' + err.message);
+    logger.error(err.stack);
     res.status(500).json({ message: 'Error al recuperar reporte.' });
   }
 };

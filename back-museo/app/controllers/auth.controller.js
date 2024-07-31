@@ -3,6 +3,9 @@ const bcrypt = require('bcryptjs');
 const db = require('../models');
 const config = require('../config/auth.config');
 const mail = require('./mail.controller');
+const { decrypt } = require('../utils/crypto');
+const logger = require('../utils/logger');
+
 
 const User = db.user;
 const Visit = db.visit;
@@ -17,14 +20,14 @@ exports.signup = async (req, res) => {
     t = await sequelize.transaction();
     // Crea el usuario
     const user = await User.create({
-      usuario: req.body.user,
-      nombre: req.body.name,
-      email: req.body.email,
+      usuario: decrypt(req.body.user),
+      nombre: decrypt(req.body.name),
+      email: decrypt(req.body.email),
       password: bcrypt.hashSync(req.body.password, 8),
       fnacimiento: req.body.nacimiento,
       pais: req.body.pais,
       estado: req.body.estado ? req.body.estado : 3,
-      usuario_modificacion: req.body.usuario_modificacion,
+      usuario_modificacion: decrypt(req.body.usuario_modificacion),
     }, { transaction: t });
     // Asigna roles al usuario
     if (req.body.roles) {
@@ -45,12 +48,12 @@ exports.signup = async (req, res) => {
       tipo_accion: 'creacion',
       datos_antiguos: null,
       datos_nuevos: null,
-      usuario_modificacion: req.body.usuario_modificacion,
+      usuario_modificacion: decrypt(req.body.usuario_modificacion),
       fecha_modificacion: new Date(),
     }, { transaction: t });
     const token = exports.createConfirmationToken(req.body.user);
-    mail.sendMail(req.body.email, token);
-    await t.commit(req.body.email);
+    mail.sendMail(decrypt(req.body.email), token);
+    await t.commit();
 
     res.send({ message: 'Usuario registrado correctamente, Por favor revise su correo y confirme su cuenta!' });
   } catch (err) {
@@ -58,6 +61,8 @@ exports.signup = async (req, res) => {
       await t.rollback();
     }
     res.status(500).send({ message: err.message || 'Error al registrar el usuario.' });
+    logger.error('Error al registrar el usuario: ' + err.message);
+    logger.error(err.stack);
   }
 };
 exports.signin = (req, res) => {
@@ -65,10 +70,10 @@ exports.signin = (req, res) => {
     where: {
       [Op.or]: [
         {
-          usuario: req.body.user,
+          usuario: decrypt(req.body.user),
         },
         {
-          email: req.body.user,
+          email: decrypt(req.body.user),
         },
       ],
       estado: 1,
@@ -80,7 +85,7 @@ exports.signin = (req, res) => {
       }
 
       const passwordIsValid = req.body.google ? true : bcrypt.compareSync(
-        req.body.password,
+        decrypt(req.body.password),
         user.password,
       );
 
@@ -129,6 +134,8 @@ exports.signin = (req, res) => {
       return true;
     })
     .catch((err) => {
+      logger.error('Error al ingresar al sistema: ' + err.message);
+      logger.error(err.stack);
       res.status(500).send({ message: err.message });
     });
 };
@@ -163,12 +170,15 @@ exports.verifyConfirmationToken = (req, res) => {
           message: 'Se ha comprobado su cuenta. Por favor inicie sesión',
         });
       }).catch((e) => {
+        logger.error('Error al confirmar cuenta: ' + e.message);
+        logger.error(e.stack);
         res.status(500).send({ message: 'Error al verificar el token de confirmación' });
-        console.error(e.message);
+
       });
     }
   } catch (error) {
-    console.error('Error al verificar el token de confirmación:', error.stack);
+    logger.error('Error al verificar el token de confirmación: ' + error.message);
+    logger.error(error.stack);
     res.status(500).send({ message: 'Error al verificar el token de confirmación' });
   }
 };
