@@ -11,6 +11,7 @@ const Technique = db.technique;
 const PieceHistory = db.piecehistory;
 const { sequelize } = db;
 const { Op } = db.Sequelize;
+const logger = require('../utils/logger');
 
 exports.getPiece = (req, res) => {
   try {
@@ -98,7 +99,6 @@ exports.getPiece = (req, res) => {
           },
         }).then((count) => {
           const totalPages = Math.ceil(count / pageSize); // Número total de páginas
-          console.log('Número total de páginas:', totalPages);
 
           // Lógica para determinar la página siguiente y anterior
           const nextPage = page < totalPages ? page + 1 : null;
@@ -109,11 +109,12 @@ exports.getPiece = (req, res) => {
         });
       })
       .catch((err) => {
-        console.error(err.stack);
+        logger.error(err.stack);
         res.status(500).send({ message: err.message });
       });
   } catch (err) {
-    console.error(err);
+    logger.error('Error al recuperar objetos: ' + err.message);
+    logger.error(err.stack);
     res.status(500).json({ message: 'Error al recuperar objetos.' });
   }
 };
@@ -163,7 +164,8 @@ exports.getInformationPieces = async (req, res) => {
       message: 'Datos consultados correctamente!',
     });
   } catch (err) {
-    console.error(err.stack);
+    logger.error('Error al consultar informacion: ' + err.message);
+    logger.error(err.stack);
     res.status(500).send({ message: err.message || 'Error al consultar informacion.' });
   }
 };
@@ -205,12 +207,15 @@ exports.deletePiece = async (req, res) => {
     } else {
       // Si no se actualizó ninguna pieza, revierte la transacción
       await t.rollback();
+      logger.info('Pieza de arte no encontrada para eliminación');
       res.status(404).send({ message: 'Pieza de arte no encontrada para eliminación.' });
     }
   } catch (err) {
     if (t) {
       await t.rollback();
     }
+    logger.error('Error al eliminar piezas de arte: ' + err.message);
+    logger.error(err.stack);
     res.status(500).send({ message: err.message || 'Error al eliminar piezas de arte.' });
   }
 };
@@ -334,13 +339,15 @@ exports.updatePiece = async (req, res) => {
       res.send({ message: 'Pieza de arte modificada correctamente!' });
     } else {
       await t.rollback();
+      logger.info('Pieza de arte no encontrado para modificación');
       res.status(404).send({ message: 'Pieza de arte no encontrado para modificación.' });
     }
   } catch (err) {
-    console.error(err.stack);
     if (t) {
       await t.rollback();
     }
+    logger.error('Error al modificar piezas de arte: ' + err.message);
+    logger.error(err.stack);
     res.status(500).send({ message: err.message || 'Error al modificar piezas de arte.' });
   }
 };

@@ -8,9 +8,7 @@ const General = db.general;
 const User = db.user;
 const Visit = db.visit;
 const Comment = db.comment;
-const Month = db.month;
-const Year = db.year;
-const Piece = db.piece;
+const logger = require('../utils/logger');
 
 exports.getCountry = (req, res) => {
   try {

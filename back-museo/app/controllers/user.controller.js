@@ -1,13 +1,14 @@
 const fs = require('fs');
 const bcrypt = require('bcryptjs');
 const db = require('../models');
-
+const logger = require('../utils/logger');
 const User = db.user;
 const Role = db.role;
 const UserHistory = db.userhistory;
 const Visit = db.visit;
 const { sequelize } = db;
 const { Op } = db.Sequelize;
+
 
 exports.allAccess = (req, res) => {
   res.status(200).send('Public Content.');
@@ -85,9 +86,6 @@ exports.getUser = (req, res) => {
           },
         }).then((count) => {
           const totalPages = Math.ceil(count / pageSize); // Número total de páginas
-
-          console.log('Número total de páginas:', totalPages);
-
           // Lógica para determinar la página siguiente y anterior
           const nextPage = page < totalPages ? page + 1 : null;
           const prevPage = page > 1 ? page - 1 : null;
@@ -98,11 +96,12 @@ exports.getUser = (req, res) => {
       });
     })
       .catch((err) => {
-        console.error(err.stack);
+        logger.error(err.stack);
         res.status(500).send({ message: err.message });
       });
   } catch (err) {
-    console.error(err);
+    logger.error('Error al recuperar: ' + err.message);
+    logger.error(err.stack);
     res.status(500).json({ message: 'Error al recuperar usuarios.' });
   }
 };
@@ -150,7 +149,8 @@ exports.deleteUser = async (req, res) => {
     if (t) {
       await t.rollback();
     }
-    console.error(err.stack);
+    logger.error('Error al eliminar el usuario: ' + err.message);
+    logger.error(err.stack);
     res.status(500).send({ message: err.message || 'Error al eliminar usuarios.' });
   }
 };
@@ -219,10 +219,12 @@ exports.updateUser = async (req, res) => {
       res.status(404).send({ message: 'Usuario no encontrado para modificación.' });
     }
   } catch (err) {
-    console.error(err.stack);
+    logger.error(err.stack);
     if (t) {
       await t.rollback();
     }
+    logger.error('Error al modificar el usuario: ' + err.message);
+    logger.error(err.stack);
     res.status(500).send({ message: err.message || 'Error al modificar usuarios.' });
   }
 };
@@ -237,7 +239,6 @@ exports.getUserId = (req, res) => {
         estado: [1],
       },
     }).then((user) => {
-      // console.log("user" + JSON.stringify(user))
       const data = user.length > 0 ? {
         usuario: user[0].usuario,
         nombre: user[0].nombre,
@@ -253,7 +254,8 @@ exports.getUserId = (req, res) => {
         res.status(500).send({ message: err.message });
       });
   } catch (err) {
-    console.error(err);
+    logger.error('Error al recuperar usuarios: ' + err.message);
+    logger.error(err.stack);
     res.status(500).json({ message: 'Error al recuperar usuarios.' });
   }
 };
@@ -310,10 +312,11 @@ exports.updateUserProfile = async (req, res) => {
       res.status(404).send({ message: 'Usuario no encontrado para modificación.' });
     }
   } catch (err) {
-    console.error(err.stack);
     if (t) {
       await t.rollback();
     }
+    logger.error('Error al modificar el usuario: ' + err.message);
+    logger.error(err.stack);
     res.status(500).send({ message: err.message || 'Error al modificar usuarios.' });
   }
 };
@@ -392,10 +395,11 @@ exports.addUserGoogle = async (req, res) => {
     }
     
   } catch (err) {
-    console.log(`error: ${err.message} ${err.stack}`);
     if (t) {
       await t.rollback();
     }
+    logger.error('Error al registrar el usuario: ' + err.message);
+    logger.error(err.stack);
     res.status(500).send({ message: err.message || 'Error al registrar el usuario.' });
   }
 };
@@ -417,10 +421,11 @@ exports.saveQuestion = async (req, res) => {
     await t.commit();
     res.send({ message: 'Visita guardada correctamente!' });
   } catch (err) {
-    console.error(err.stack);
     if (t) {
       await t.rollback();
     }
+    logger.error('Error al guardar visita: ' + err.message);
+    logger.error(err.stack);
     res.status(500).send({ message: err.message || 'Error al guardar visita.' });
   }
 };

@@ -5,6 +5,7 @@ const General = db.general;
 const User = db.user;
 const Visit = db.visit;
 const { sequelize } = db;
+const logger = require('../utils/logger');
 // const Op = db.Sequelize.Op;
 
 exports.allAccess = (req, res) => {
@@ -45,9 +46,6 @@ exports.getCommentList = (req, res) => {
         },
       }).then((count) => {
         const totalPages = Math.ceil(count / pageSize); // Número total de páginas
-
-        logger.info('Número total de páginas:'+ totalPages);
-
         // Lógica para determinar la página siguiente y anterior
         const nextPage = page < totalPages ? page + 1 : null;
         const prevPage = page > 1 ? page - 1 : null;

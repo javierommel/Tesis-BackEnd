@@ -2,6 +2,7 @@ require('dotenv').config();
 const fs = require('fs');
 const axios = require('axios')
 const FormData = require('form-data');
+const logger = require('../utils/logger');
 
 const PROCESS_URL = process.env.URL_PROCESS + "servicio1/";
 
@@ -18,7 +19,8 @@ exports.getRecomendation = async (req, res) => {
     );
     res.send(response.data);
   } catch (error) {
-    console.error('Error al obtener recomendación Python:', error);
+    logger.error('Error al obtener recomendación Python: ' + error.message);
+    logger.error(error.stack);
     res.status(500).send({ mensaje: 'Error al obtener recomendacion', retcode: 96 });
   }
 };
@@ -28,6 +30,7 @@ exports.getTranscribe = async (req, res) => {
     const { language, tipo } = req.body;
     const file = req.file;
     if (!file) {
+      logger.info('getTranscribe: Archivo no cargado ');
       return res.status(400).send('Archivo de audio no encontrado.');
     }
     const formData = new FormData();
@@ -41,14 +44,15 @@ exports.getTranscribe = async (req, res) => {
     );
     fs.unlink(file.path, (err) => {
       if (err) {
-        console.error('Error al borrar el audio:', err);
+        logger.error('Error al borrar el audio: '+ err);
       } else {
-        console.log('Audio borrado exitosamente');
+        logger.info('Audio borrado exitosamente')
       }
     });
     res.send(response.data);
   } catch (error) {
-    console.error('Error transcribir Python:', error);
+    logger.error('Error transcribir Python: ' + error.message);
+    logger.error(error.stack);
     res.status(500).send({ mensaje: error, retcode: 96 });
   }
 };
@@ -68,7 +72,8 @@ exports.getChat = async (req, res) => {
     );
     res.send(response.data);
   } catch (error) {
-    console.error('Error al consultar chat Python:', error);
+    logger.error('Error al consultar chat Python: ' + error.message);
+    logger.error(error.stack);
     res.status(500).send({ mensaje: 'Error al  consultar Chat', retcode: 96 });
   }
 };
@@ -85,7 +90,8 @@ exports.cargarModelo = (req, res) => {
     );
     res.send(response.data);
   } catch (error) {
-    console.error('Error fetching message from Python:', error);
+    logger.error('Error fetching message from Python: ' + error.message);
+    logger.error(error.stack);
     res.status(500).send('Error fetching message');
   }
 };
@@ -95,6 +101,7 @@ exports.cargarPiezas = async (req, res) => {
     const { usuario_modificacion } = req.body;
     const file = req.file;
     if (!file) {
+      logger.info('cargar Piezas: Archivo no cargado ');
       return res.status(400).send('Archivo no cargado.');
     }
     const formData = new FormData();
@@ -107,14 +114,15 @@ exports.cargarPiezas = async (req, res) => {
     );
     fs.unlink(file.path, (err) => {
       if (err) {
-        console.error('Error al borrar el archivo:', err);
+        logger.error('Error al borrar el archivo: ' + err);
       } else {
-        console.log('Archivo borrado exitosamente');
+        logger.info('Archivo borrado exitosamente ');
       }
     });
     res.send(response.data);
   } catch (error) {
-    console.error('Error fetching message from Python:', error);
+    logger.error('Error fetching message from Python: ' + error.message);
+    logger.error(error.stack);
     res.status(500).json({ message: 'Error al cargar piezas de arte.' });
   }
 };

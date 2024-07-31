@@ -4,6 +4,7 @@ const { google } = require('googleapis');
 const { OAuth2 } = google.auth;
 
 const accountTransport = require('../config/mail.config');
+const logger = require('../utils/logger');
 
 exports.sendMail = async (to, token) => {
   const mailConfirmacion = '<!DOCTYPE html>'
@@ -108,9 +109,9 @@ exports.sendMail = async (to, token) => {
     // Enviar el correo electrónico
     transporter.sendMail(mailOptions, (error, info) => {
       if (error) {
-        console.log(error);
+		logger.error('Error al enviar correo: '+mailOptions.to +' '+ error);
       } else {
-        console.log('Correo enviado:', info.response);
+		logger.info('Correo enviado: '+mailConfirmacion.to +' '+info.response);
       }
     });
   //});
