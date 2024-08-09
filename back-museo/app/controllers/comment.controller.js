@@ -6,7 +6,6 @@ const User = db.user;
 const Visit = db.visit;
 const { sequelize } = db;
 const logger = require('../utils/logger');
-// const Op = db.Sequelize.Op;
 
 exports.allAccess = (req, res) => {
   res.status(200).send('Public Content.');
